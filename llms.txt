@@ -1,0 +1,16 @@
+# openAut
+
+> openAut är en öppen AI-plattform för fastighetsautomation med lokal inferens, full transparens och ingen leverantörsinlåsning.
+
+## Primary URL
+- https://openaut.io/
+
+## Summary
+openAut hjälper fastighetsägare att analysera byggnadsdata lokalt i den egna infrastrukturen. Plattformen är öppen källkod och designad för offentlig sektor, upphandling och långsiktig förvaltning.
+
+## Indexing and crawler policy
+- Public website content may be indexed by search engines and AI/LLM crawlers.
+- Refer to robots.txt for crawler access and sitemap discovery.
+
+## Contact and source
+- GitHub: https://github.com/openaut
