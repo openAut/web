@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Systemtopologi — openAut</title>
+<meta name="description" content="openAuts systemtopologi: lager, protokoll, dataflöden och verifierad referenshårdvara för AI-driven fastighetsautomation.">
+<link rel="canonical" href="https://openaut.io/topologi">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #060a0c;
+  --surface:   #0d1519;
+  --surface2:  #111d22;
+  --border:    rgba(0,220,130,0.15);
+  --green:     #00dc82;
+  --green-dim: rgba(0,220,130,0.6);
+  --green-glow:rgba(0,220,130,0.07);
+  --cyan:      #00c8e0;
+  --amber:     #f5a623;
+  --purple:    #a78bfa;
+  --text:      #e2ede8;
+  --muted:     #6b8a7a;
+  --dim:       #3d5249;
+  --mono:      'Space Mono', monospace;
+  --display:   'Syne', sans-serif;
+  --body:      'Inter', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 999; opacity: 0.4;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 1.1rem 3rem;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid var(--border);
+  background: rgba(6,10,12,0.92);
+  backdrop-filter: blur(14px);
+}
+.nav-back {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--muted);
+  text-decoration: none;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: flex; align-items: center; gap: 0.6rem;
+  transition: color 0.2s;
+}
+.nav-back::before { content: '←'; color: var(--green); }
+.nav-back:hover { color: var(--green); }
+.nav-logo {
+  font-family: var(--mono);
+  font-size: 1rem;
+  color: var(--green);
+  letter-spacing: 0.05em;
+  text-decoration: none;
+}
+.nav-logo span { color: var(--muted); }
+.nav-tag {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--dim);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ── PAGE HEADER ── */
+.page-header {
+  padding: 8rem 3rem 3rem;
+  max-width: 860px;
+  margin: 0 auto;
+}
+.page-label {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--green);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-bottom: 1.2rem;
+  display: flex; align-items: center; gap: 0.8rem;
+}
+.page-label::before {
+  content: '';
+  display: block; width: 28px; height: 1px;
+  background: var(--green);
+}
+.page-title {
+  font-family: var(--display);
+  font-size: clamp(2rem, 4.5vw, 3.6rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  margin-bottom: 1.2rem;
+}
+.page-title em { font-style: normal; color: var(--green); }
+.page-desc {
+  font-size: 1rem;
+  font-weight: 300;
+  color: var(--muted);
+  max-width: 64ch;
+  line-height: 1.85;
+}
+
+/* ── TOPOLOGY CONTAINER ── */
+.topo-wrap {
+  padding: 0 3rem 4rem;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.oa-wrap {
+  background: #060a0c;
+  border: 1px solid rgba(0,220,130,0.2);
+  border-radius: 12px;
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+}
+.oa-grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0,220,130,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,220,130,0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+.oa-hdr {
+  position: relative;
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 20px;
+  border-bottom: 1px solid rgba(0,220,130,0.15);
+}
+.oa-pulse {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #00dc82; box-shadow: 0 0 6px #00dc82;
+  animation: hbp 2s infinite;
+}
+@keyframes hbp { 0%,100%{opacity:1} 50%{opacity:.25} }
+.oa-logo { font-size: 12px; color: #00dc82; letter-spacing: .08em; font-family: var(--mono); }
+.oa-logo span { color: #3d5249; }
+.oa-leg {
+  position: relative;
+  display: flex; flex-wrap: wrap; gap: 14px;
+  padding: 11px 20px;
+  border-top: 1px solid rgba(0,220,130,0.1);
+}
+.li { display: flex; align-items: center; gap: 6px; font-size: 9px; color: #3d5249; letter-spacing: .04em; font-family: var(--mono); }
+.ld { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+/* ── HARDWARE SECTION ── */
+.hw-section {
+  padding: 4rem 3rem 6rem;
+  max-width: 960px;
+  margin: 0 auto;
+}
+.hw-section-label {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--green);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  display: flex; align-items: center; gap: 0.8rem;
+}
+.hw-section-label::before {
+  content: '';
+  display: block; width: 28px; height: 1px;
+  background: var(--green);
+}
+.hw-section-title {
+  font-family: var(--display);
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.8rem;
+}
+.hw-section-title em { font-style: normal; color: var(--green); }
+.hw-disclaimer {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--dim);
+  letter-spacing: 0.04em;
+  padding: 0.8rem 1.2rem;
+  border: 1px solid rgba(0,220,130,0.1);
+  border-left: 2px solid var(--green);
+  background: rgba(0,220,130,0.03);
+  margin-bottom: 3rem;
+  line-height: 1.6;
+}
+.hw-disclaimer strong { color: var(--green); }
+
+/* ── LAYER GROUP ── */
+.hw-group {
+  margin-bottom: 3rem;
+}
+.hw-group-header {
+  display: flex; align-items: center; gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+.hw-group-pill {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.9rem;
+  border-radius: 2px;
+  font-weight: 700;
+}
+.pill-ai     { background: rgba(124,58,237,0.2); color: #a78bfa; border: 1px solid rgba(124,58,237,0.4); }
+.pill-edge   { background: rgba(6,182,212,0.12); color: #22d3ee; border: 1px solid rgba(6,182,212,0.35); }
+.pill-field  { background: rgba(217,119,6,0.12); color: #f59e0b; border: 1px solid rgba(217,119,6,0.3); }
+.hw-group-name {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+
+/* ── CARD GRID ── */
+.hw-grid {
+  display: grid;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.hw-grid-2 { grid-template-columns: 1fr 1fr; }
+.hw-grid-2-1 { grid-template-columns: 1fr 1fr; }
+
+/* ── HARDWARE CARD ── */
+.hw-card {
+  background: var(--surface);
+  padding: 2rem 1.8rem;
+  position: relative;
+  transition: background 0.25s;
+  cursor: default;
+}
+.hw-card:hover { background: var(--surface2); }
+
+.hw-card-alt-badge {
+  position: absolute; top: 1rem; right: 1rem;
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  color: var(--dim);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 1px solid rgba(0,220,130,0.15);
+  padding: 0.2rem 0.5rem;
+}
+
+.hw-vendor {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--dim);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+.hw-model {
+  font-family: var(--display);
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.3rem;
+  line-height: 1.2;
+}
+.hw-model-sub {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  margin-bottom: 1.4rem;
+}
+
+/* Spec grid */
+.hw-specs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem 1.2rem;
+  margin-bottom: 1.4rem;
+}
+.hw-spec {
+  display: flex; flex-direction: column; gap: 0.15rem;
+}
+.hw-spec-label {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  color: var(--dim);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.hw-spec-value {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+
+/* Role note */
+.hw-role {
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+  margin-top: auto;
+}
+.hw-role-label {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  color: var(--green);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+}
+.hw-role-text {
+  font-size: 0.82rem;
+  font-weight: 300;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.hw-role-text strong { color: var(--text); font-weight: 500; }
+
+/* Tags */
+.hw-tags {
+  display: flex; flex-wrap: wrap; gap: 0.4rem;
+  margin-top: 0.9rem;
+}
+.hw-tag {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  color: var(--dim);
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.02);
+}
+.hw-tag-hi {
+  color: var(--green);
+  border-color: rgba(0,220,130,0.2);
+  background: rgba(0,220,130,0.04);
+}
+
+/* OR divider between AI alternatives */
+.hw-or-sep {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  width: 1px;
+  position: relative;
+}
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 2.5rem 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.footer-logo {
+  font-family: var(--mono);
+  font-size: 1rem;
+  color: var(--green);
+  letter-spacing: 0.05em;
+}
+.footer-logo span { color: var(--muted); }
+.footer-meta {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--dim);
+  letter-spacing: 0.06em;
+  text-align: right;
+  line-height: 1.9;
+}
+.footer-meta a {
+  color: var(--green);
+  text-decoration: none;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 680px) {
+  nav { padding: 1rem 1.5rem; }
+  .page-header, .topo-wrap, .hw-section { padding-left: 1.5rem; padding-right: 1.5rem; }
+  .hw-grid-2, .hw-grid-2-1 { grid-template-columns: 1fr; }
+  footer { padding: 2rem 1.5rem; flex-direction: column; align-items: flex-start; }
+  .footer-meta { text-align: left; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-back">openaut.io</a>
+  <a href="/" class="nav-logo">open<span>Aut</span></a>
+  <span class="nav-tag">Systemtopologi</span>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-label">Arkitektur</div>
+  <h1 class="page-title">Systemtopologi.<br><em>Lager för lager.</em></h1>
+  <p class="page-desc">Fullständig bild av openAuts arkitektur — från fältsensorer via edge-noder till AI-lager och gränssnitt. Protokoll, dataflöden och verifierad referenshårdvara för varje lager.</p>
+</div>
+
+<!-- TOPOLOGY DIAGRAM -->
+<div class="topo-wrap">
+  <div class="oa-wrap">
+    <div class="oa-grid"></div>
+    <div class="oa-hdr">
+      <div class="oa-pulse"></div>
+      <span class="oa-logo">open<span>Aut</span> — systemtopologi</span>
+      <span style="margin-left:auto;font-size:9px;color:#3d5249;letter-spacing:.1em;font-family:'Space Mono',monospace;">IEC 62443 · NIS2 · MIT</span>
+    </div>
+
+    <svg id="oaSvg" width="100%" viewBox="0 0 680 440" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+
+      <!-- ══ RAD 1 ══ -->
+      <rect x="16"  y="16" width="134" height="72" rx="7" fill="rgba(93,78,255,0.12)"  stroke="rgba(93,78,255,0.5)"   stroke-width="0.75"/>
+      <text x="83"  y="40" font-family="'Space Mono',monospace" font-size="9"   fill="#8b7cf8" text-anchor="middle">Microsoft Teams</text>
+      <text x="83"  y="56" font-family="'Space Mono',monospace" font-size="7.5" fill="#4a3f7a" text-anchor="middle">openAut Bot</text>
+
+      <rect x="160" y="16" width="160" height="72" rx="7" fill="rgba(59,130,246,0.1)"   stroke="rgba(59,130,246,0.4)"  stroke-width="0.75"/>
+      <text x="240" y="36" font-family="'Space Mono',monospace" font-size="9"   fill="#6096d4" text-anchor="middle">SharePoint</text>
+      <text x="240" y="50" font-family="'Space Mono',monospace" font-size="7.5" fill="#2a4060" text-anchor="middle">Applikationsprofiler · I/O-listor</text>
+      <text x="240" y="63" font-family="'Space Mono',monospace" font-size="7.5" fill="#2a4060" text-anchor="middle">FAT/SAT · Ritningar</text>
+
+      <rect x="330" y="16" width="172" height="72" rx="7" fill="rgba(202,138,4,0.1)"    stroke="rgba(202,138,4,0.45)"  stroke-width="0.75"/>
+      <text x="416" y="35" font-family="'Space Mono',monospace" font-size="9"   fill="#facc15" text-anchor="middle">BMS — Befintliga system</text>
+      <text x="416" y="49" font-family="'Space Mono',monospace" font-size="7.5" fill="#5a4000" text-anchor="middle">Desigo CC · EcoStruxure</text>
+      <text x="416" y="62" font-family="'Space Mono',monospace" font-size="7.5" fill="#5a4000" text-anchor="middle">Trend · Regin · Niagara</text>
+      <text x="416" y="75" font-family="'Space Mono',monospace" font-size="7.5" fill="#5a4000" text-anchor="middle">BACnet/IP · OPC UA</text>
+
+      <rect x="514" y="16" width="150" height="72" rx="7" fill="rgba(22,163,74,0.1)"    stroke="rgba(22,163,74,0.5)"   stroke-width="0.75"/>
+      <text x="589" y="36" font-family="'Space Mono',monospace" font-size="9"   fill="#4ade80" text-anchor="middle">IWMS-system</text>
+      <text x="589" y="50" font-family="'Space Mono',monospace" font-size="7.5" fill="#1a4d2a" text-anchor="middle">TimescaleDB</text>
+      <text x="589" y="63" font-family="'Space Mono',monospace" font-size="7.5" fill="#1a4d2a" text-anchor="middle">Tidsserie · Trender</text>
+      <text x="589" y="76" font-family="'Space Mono',monospace" font-size="7.5" fill="#1a4d2a" text-anchor="middle">Larm · Energidata</text>
+
+      <!-- ══ RAD 2 ══ -->
+      <rect x="16"  y="108" width="186" height="118" rx="7" fill="rgba(22,163,74,0.1)"  stroke="rgba(22,163,74,0.5)"   stroke-width="0.75"/>
+      <text x="109" y="128" font-family="'Space Mono',monospace" font-size="9"   fill="#4ade80" text-anchor="middle">Masterdatabas</text>
+      <text x="109" y="143" font-family="'Space Mono',monospace" font-size="7.5" fill="#1a4d2a" text-anchor="middle">PostgreSQL</text>
+      <text x="109" y="157" font-family="'Space Mono',monospace" font-size="7.5" fill="#1a4d2a" text-anchor="middle">Enheter · Metadata</text>
+      <text x="109" y="171" font-family="'Space Mono',monospace" font-size="7.5" fill="#1a4d2a" text-anchor="middle">Haystack · Brick Schema</text>
+      <text x="109" y="185" font-family="'Space Mono',monospace" font-size="7.5" fill="#1a4d2a" text-anchor="middle">OPC UA-namnrymd</text>
+      <text x="109" y="199" font-family="'Space Mono',monospace" font-size="7.5" fill="#1a4d2a" text-anchor="middle">Konfiguration</text>
+      <text x="109" y="213" font-family="'Space Mono',monospace" font-size="7.5" fill="#1a4d2a" text-anchor="middle">Signalförteckning</text>
+
+      <rect x="212" y="108" width="452" height="118" rx="7" fill="rgba(124,58,237,0.1)" stroke="rgba(124,58,237,0.55)" stroke-width="0.75"/>
+      <text x="226" y="126" font-family="'Space Mono',monospace" font-size="9"   fill="#a78bfa">NemoClaw · DGX Spark</text>
+      <text x="226" y="139" font-family="'Space Mono',monospace" font-size="7"   fill="rgba(167,139,250,0.45)">GB10 Grace Blackwell · 128GB unified memory · ARM64 · Air-gapped</text>
+      <text x="226" y="157" font-family="'Space Mono',monospace" font-size="7.5" fill="#6b46c1">▸ MQTT-broker</text>
+      <text x="226" y="170" font-family="'Space Mono',monospace" font-size="7"   fill="#3d2070">  EMQX / Mosquitto · TLS · Auth</text>
+      <text x="226" y="185" font-family="'Space Mono',monospace" font-size="7.5" fill="#6b46c1">▸ LLM-motor</text>
+      <text x="226" y="198" font-family="'Space Mono',monospace" font-size="7"   fill="#3d2070">  OpenClaw / NemoClaw · ≤200B param</text>
+      <text x="226" y="213" font-family="'Space Mono',monospace" font-size="7.5" fill="#6b46c1">▸ FDD — Feldetektering</text>
+      <text x="448" y="157" font-family="'Space Mono',monospace" font-size="7.5" fill="#6b46c1">▸ Energioptimering</text>
+      <text x="448" y="170" font-family="'Space Mono',monospace" font-size="7"   fill="#3d2070">  Prediktion · Lastprognos</text>
+      <text x="448" y="185" font-family="'Space Mono',monospace" font-size="7.5" fill="#6b46c1">▸ Anomalidetektering</text>
+      <text x="448" y="198" font-family="'Space Mono',monospace" font-size="7"   fill="#3d2070">  Korrelation · Larmfiltrering</text>
+      <text x="448" y="213" font-family="'Space Mono',monospace" font-size="7.5" fill="#6b46c1">▸ Fine-tuning</text>
+      <circle cx="651" cy="120" r="3.5" fill="#a78bfa" opacity="0.8">
+        <animate attributeName="opacity" values="0.8;0.15;0.8" dur="2.1s" repeatCount="indefinite"/>
+      </circle>
+
+      <!-- ══ RAD 3 — EDGE-NODER ══ -->
+      <rect x="16"  y="246" width="148" height="72" rx="7" fill="rgba(6,182,212,0.08)" stroke="rgba(6,182,212,0.45)" stroke-width="0.75"/>
+      <text x="90"  y="263" font-family="'Space Mono',monospace" font-size="8"   fill="#22d3ee" text-anchor="middle">Edge-nod · Profil A/D</text>
+      <text x="90"  y="277" font-family="'Space Mono',monospace" font-size="7"   fill="#0e4a54" text-anchor="middle">M-Bus · Modbus RTU</text>
+      <text x="90"  y="290" font-family="'Space Mono',monospace" font-size="7"   fill="#0e4a54" text-anchor="middle">Energi · Miljö</text>
+      <text x="90"  y="303" font-family="'Space Mono',monospace" font-size="6.5" fill="#083040" text-anchor="middle">OPC UA · MQTT · 24–72h</text>
+
+      <rect x="176" y="246" width="148" height="72" rx="7" fill="rgba(6,182,212,0.08)" stroke="rgba(6,182,212,0.45)" stroke-width="0.75"/>
+      <text x="250" y="263" font-family="'Space Mono',monospace" font-size="8"   fill="#22d3ee" text-anchor="middle">Edge-nod · Profil B/G</text>
+      <text x="250" y="277" font-family="'Space Mono',monospace" font-size="7"   fill="#0e4a54" text-anchor="middle">BACnet MS/TP · IP</text>
+      <text x="250" y="290" font-family="'Space Mono',monospace" font-size="7"   fill="#0e4a54" text-anchor="middle">MGate 5105 · VVS · DCV</text>
+      <text x="250" y="303" font-family="'Space Mono',monospace" font-size="6.5" fill="#083040" text-anchor="middle">OPC UA · MQTT</text>
+
+      <rect x="336" y="246" width="152" height="72" rx="7" fill="rgba(6,182,212,0.1)"  stroke="rgba(6,182,212,0.6)"  stroke-width="0.75"/>
+      <text x="412" y="263" font-family="'Space Mono',monospace" font-size="8"   fill="#22d3ee" text-anchor="middle">Edge-nod · Profil C/E/F</text>
+      <text x="412" y="277" font-family="'Space Mono',monospace" font-size="7"   fill="#0e4a54" text-anchor="middle">Modbus TCP · IEC 62443 SL2</text>
+      <text x="412" y="290" font-family="'Space Mono',monospace" font-size="7"   fill="#0e4a54" text-anchor="middle">Kylmaskin · AHU · El</text>
+      <text x="412" y="303" font-family="'Space Mono',monospace" font-size="6.5" fill="#083040" text-anchor="middle">Azure IoT Edge ready</text>
+
+      <rect x="500" y="246" width="164" height="72" rx="7" fill="rgba(6,182,212,0.08)" stroke="rgba(6,182,212,0.45)" stroke-width="0.75"/>
+      <text x="582" y="263" font-family="'Space Mono',monospace" font-size="8"   fill="#22d3ee" text-anchor="middle">Edge-nod · Profil H</text>
+      <text x="582" y="277" font-family="'Space Mono',monospace" font-size="7"   fill="#0e4a54" text-anchor="middle">LoRaWAN · EU868</text>
+      <text x="582" y="290" font-family="'Space Mono',monospace" font-size="7"   fill="#0e4a54" text-anchor="middle">ChirpStack · Dragino DLOS8N</text>
+      <text x="582" y="303" font-family="'Space Mono',monospace" font-size="6.5" fill="#083040" text-anchor="middle">LTE</text>
+
+      <!-- ══ RAD 4 — FÄLT ══ -->
+      <rect x="16"  y="336" width="100" height="44" rx="6" fill="rgba(217,119,6,0.08)" stroke="rgba(217,119,6,0.35)" stroke-width="0.75"/>
+      <text x="66"  y="353" font-family="'Space Mono',monospace" font-size="7.5" fill="#f59e0b" text-anchor="middle">Energimätare</text>
+      <text x="66"  y="366" font-family="'Space Mono',monospace" font-size="6.5" fill="#5a3e00" text-anchor="middle">M-Bus · kWh</text>
+
+      <rect x="126" y="336" width="100" height="44" rx="6" fill="rgba(217,119,6,0.08)" stroke="rgba(217,119,6,0.35)" stroke-width="0.75"/>
+      <text x="176" y="353" font-family="'Space Mono',monospace" font-size="7.5" fill="#f59e0b" text-anchor="middle">CO₂ · Temp</text>
+      <text x="176" y="366" font-family="'Space Mono',monospace" font-size="6.5" fill="#5a3e00" text-anchor="middle">Modbus RTU</text>
+
+      <rect x="236" y="336" width="100" height="44" rx="6" fill="rgba(217,119,6,0.08)" stroke="rgba(217,119,6,0.35)" stroke-width="0.75"/>
+      <text x="286" y="353" font-family="'Space Mono',monospace" font-size="7.5" fill="#f59e0b" text-anchor="middle">AHU · Kylmaskin</text>
+      <text x="286" y="366" font-family="'Space Mono',monospace" font-size="6.5" fill="#5a3e00" text-anchor="middle">Modbus TCP</text>
+
+      <rect x="346" y="336" width="100" height="44" rx="6" fill="rgba(217,119,6,0.08)" stroke="rgba(217,119,6,0.35)" stroke-width="0.75"/>
+      <text x="396" y="353" font-family="'Space Mono',monospace" font-size="7.5" fill="#f59e0b" text-anchor="middle">Elkvalitet</text>
+      <text x="396" y="366" font-family="'Space Mono',monospace" font-size="6.5" fill="#5a3e00" text-anchor="middle">Modbus TCP</text>
+
+      <rect x="456" y="336" width="100" height="44" rx="6" fill="rgba(217,119,6,0.08)" stroke="rgba(217,119,6,0.35)" stroke-width="0.75"/>
+      <text x="506" y="353" font-family="'Space Mono',monospace" font-size="7.5" fill="#f59e0b" text-anchor="middle">PLC · DUC</text>
+      <text x="506" y="366" font-family="'Space Mono',monospace" font-size="6.5" fill="#5a3e00" text-anchor="middle">IEC 61131</text>
+
+      <rect x="566" y="336" width="98"  height="44" rx="6" fill="rgba(217,119,6,0.08)" stroke="rgba(217,119,6,0.35)" stroke-width="0.75"/>
+      <text x="615" y="353" font-family="'Space Mono',monospace" font-size="7.5" fill="#f59e0b" text-anchor="middle">LoRa-sensorer</text>
+      <text x="615" y="366" font-family="'Space Mono',monospace" font-size="6.5" fill="#5a3e00" text-anchor="middle">EU868 · OTAA</text>
+
+      <!-- ══ LINJER — ÖVRE LAGER ══ -->
+      <path id="l-bms"    d="M416,88 L416,95 L109,95 L109,108"          fill="none" stroke="#facc15" stroke-width="0.75" opacity="0.4" marker-end="url(#ar)"/>
+      <path id="l-iwms"   d="M514,52 L514,102 L180,102 L180,108"        fill="none" stroke="#4ade80" stroke-width="0.75" opacity="0.4" marker-end="url(#ar)"/>
+      <path id="l-teams"  d="M83,88 L83,104 L212,104 L212,108"          fill="none" stroke="#8b7cf8" stroke-width="0.75" opacity="0.4" marker-end="url(#ar)"/>
+      <path id="l-sp"     d="M240,88 L240,108"                          fill="none" stroke="#8b7cf8" stroke-width="0.75" opacity="0.4" marker-end="url(#ar)"/>
+      <path id="l-m-nc"   d="M202,152 L212,152"                         fill="none" stroke="#00dc82" stroke-width="1"    opacity="0.5" marker-end="url(#ar)"/>
+      <path id="l-nc-m"   d="M212,168 L202,168"                         fill="none" stroke="#00dc82" stroke-width="1"    opacity="0.5" marker-end="url(#ar)"/>
+      <path id="l-e1-nc"  d="M92,246 L92,242 L216,242 L216,226"         fill="none" stroke="#22d3ee" stroke-width="0.75" opacity="0.4" marker-end="url(#ar)"/>
+      <path id="l-e2-nc"  d="M253,246 L253,226"                         fill="none" stroke="#22d3ee" stroke-width="0.75" opacity="0.4" marker-end="url(#ar)"/>
+      <path id="l-e3-nc"  d="M416,246 L416,226"                         fill="none" stroke="#22d3ee" stroke-width="0.75" opacity="0.4" marker-end="url(#ar)"/>
+      <path id="l-e4-nc"  d="M584,246 L584,226"                         fill="none" stroke="#22d3ee" stroke-width="0.75" opacity="0.4" marker-end="url(#ar)"/>
+      <path id="l-nc-e1"  d="M218,226 L218,244 L88,244 L88,246"         fill="none" stroke="#22d3ee" stroke-width="0.75" opacity="0.35" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+      <path id="l-nc-e2"  d="M247,226 L247,246"                         fill="none" stroke="#22d3ee" stroke-width="0.75" opacity="0.35" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+      <path id="l-nc-e3"  d="M410,226 L410,246"                         fill="none" stroke="#22d3ee" stroke-width="0.75" opacity="0.35" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+      <path id="l-nc-e4"  d="M580,226 L580,246"                         fill="none" stroke="#22d3ee" stroke-width="0.75" opacity="0.35" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+      <path id="l-e1-m"   d="M88,246 L88,226"                           fill="none" stroke="#4ade80" stroke-width="0.75" opacity="0.4" marker-end="url(#ar)"/>
+      <path id="l-e2-m"   d="M244,246 L244,236 L160,236 L160,226"       fill="none" stroke="#4ade80" stroke-width="0.75" opacity="0.4" marker-end="url(#ar)"/>
+      <path id="l-e3-m"   d="M406,246 L406,234 L160,234 L160,226"       fill="none" stroke="#4ade80" stroke-width="0.75" opacity="0.4" marker-end="url(#ar)"/>
+      <path id="l-e4-m"   d="M576,246 L576,232 L160,232 L160,226"       fill="none" stroke="#4ade80" stroke-width="0.75" opacity="0.4" marker-end="url(#ar)"/>
+      <text x="390" y="222" font-family="'Space Mono',monospace" font-size="6.5" fill="rgba(34,211,238,0.4)" text-anchor="middle" letter-spacing="1">SSH</text>
+
+      <!-- ══ LINJER — FÄLTLAGER → EDGE ══ -->
+      <path id="l-f1-e1" d="M 66,336 L 66,328 L 90,328 L 90,318"        fill="none" stroke="#f59e0b" stroke-width="0.8" opacity="0.55" marker-end="url(#ar)"/>
+      <text x="50" y="331" font-family="'Space Mono',monospace" font-size="5.5" fill="rgba(245,158,11,0.55)" text-anchor="middle" letter-spacing="0.3">M-Bus</text>
+      <path id="l-f2-e1" d="M 176,336 L 176,322 L 86,322 L 86,318"      fill="none" stroke="#f59e0b" stroke-width="0.8" opacity="0.55" marker-end="url(#ar)"/>
+      <text x="134" y="320" font-family="'Space Mono',monospace" font-size="5.5" fill="rgba(245,158,11,0.55)" text-anchor="middle" letter-spacing="0.3">RS485 · RTU</text>
+      <path id="l-f3-e3" d="M 286,336 L 286,328 L 388,328 L 388,318"    fill="none" stroke="#f59e0b" stroke-width="0.8" opacity="0.55" marker-end="url(#ar)"/>
+      <text x="337" y="326" font-family="'Space Mono',monospace" font-size="5.5" fill="rgba(245,158,11,0.55)" text-anchor="middle" letter-spacing="0.3">Modbus TCP</text>
+      <path id="l-f4-e3" d="M 396,336 L 396,324 L 416,324 L 416,318"    fill="none" stroke="#f59e0b" stroke-width="0.8" opacity="0.55" marker-end="url(#ar)"/>
+      <text x="432" y="328" font-family="'Space Mono',monospace" font-size="5.5" fill="rgba(245,158,11,0.55)" text-anchor="start" letter-spacing="0.3">TCP</text>
+      <path id="l-f5-e2" d="M 506,336 L 506,319 L 256,319 L 256,318"    fill="none" stroke="#f59e0b" stroke-width="0.8" opacity="0.55" marker-end="url(#ar)"/>
+      <text x="385" y="317" font-family="'Space Mono',monospace" font-size="5.5" fill="rgba(245,158,11,0.55)" text-anchor="middle" letter-spacing="0.3">BACnet MS/TP · IP</text>
+      <path id="l-f6-e4" d="M 615,336 L 615,328 L 586,328 L 586,318"    fill="none" stroke="#f59e0b" stroke-width="0.8" opacity="0.55" marker-end="url(#ar)"/>
+      <text x="634" y="330" font-family="'Space Mono',monospace" font-size="5.5" fill="rgba(245,158,11,0.55)" text-anchor="middle" letter-spacing="0.3">LoRaWAN</text>
+
+      <g id="dots"></g>
+    </svg>
+
+    <div class="oa-leg">
+      <div class="li"><div class="ld" style="background:#8b7cf8"></div>UI → NemoClaw</div>
+      <div class="li"><div class="ld" style="background:#facc15"></div>BMS → Masterdatabas</div>
+      <div class="li"><div class="ld" style="background:#4ade80"></div>IWMS → Masterdatabas · Edge → Masterdatabas</div>
+      <div class="li"><div class="ld" style="background:#00dc82"></div>Masterdatabas ↔ NemoClaw</div>
+      <div class="li"><div class="ld" style="background:#22d3ee"></div>Edge ↔ NemoClaw (data / SSH streckad)</div>
+      <div class="li"><div class="ld" style="background:#f59e0b"></div>Fält → Edge (M-Bus · Modbus RTU/TCP · BACnet · LoRaWAN)</div>
+    </div>
+  </div>
+</div>
+
+<!-- HARDWARE SECTION -->
+<div class="hw-section">
+
+  <div class="hw-section-label">Referenshårdvara</div>
+  <h2 class="hw-section-title">Verifierad på riktig<br><em>hårdvara.</em></h2>
+
+  <div class="hw-disclaimer">
+    <strong>openAut är hårdvaruagnostisk.</strong> Nedanstående är testad referenshårdvara — inte ett krav. Varje lager kan ersättas med kompatibel utrustning som uppfyller protokoll- och prestandakraven. Välj det din organisation redan äger, kan upphandla eller föredrar.
+  </div>
+
+  <!-- AI-LAGER -->
+  <div class="hw-group">
+    <div class="hw-group-header">
+      <span class="hw-group-pill pill-ai">AI-lager</span>
+      <span class="hw-group-name">LLM-inferens · MQTT-broker · FDD · Energioptimering</span>
+    </div>
+
+    <div class="hw-grid hw-grid-2">
+
+      <!-- NVIDIA DGX Spark -->
+      <div class="hw-card">
+        <div class="hw-vendor">NVIDIA</div>
+        <div class="hw-model">DGX Spark</div>
+        <div class="hw-model-sub">Personal AI Supercomputer · GB10 Grace Blackwell</div>
+        <div class="hw-specs">
+          <div class="hw-spec">
+            <span class="hw-spec-label">Prestanda</span>
+            <span class="hw-spec-value">1 PFLOP FP4</span>
+          </div>
+          <div class="hw-spec">
+            <span class="hw-spec-label">Minne</span>
+            <span class="hw-spec-value">128 GB unified</span>
+          </div>
+          <div class="hw-spec">
+            <span class="hw-spec-label">Lagring</span>
+            <span class="hw-spec-value">4 TB NVMe SSD</span>
+          </div>
+          <div class="hw-spec">
+            <span class="hw-spec-label">OS</span>
+            <span class="hw-spec-value">DGX OS (Ubuntu 24.04)</span>
+          </div>
+          <div class="hw-spec">
+            <span class="hw-spec-label">Arkitektur</span>
+            <span class="hw-spec-value">ARM64 (ARMv9-A)</span>
+          </div>
+          <div class="hw-spec">
+            <span class="hw-spec-label">Modeller</span>
+            <span class="hw-spec-value">Upp till 200B param</span>
+          </div>
+        </div>
+        <div class="hw-role">
+          <div class="hw-role-label">Roll i openAut</div>
+          <div class="hw-role-text">Kör <strong>OpenClaw / NemoClaw</strong> lokalt. Håller MQTT-broker, LLM-inferens, FDD-modeller och energioptimering. All data stannar i fastigheten.</div>
+        </div>
+        <div class="hw-tags">
+          <span class="hw-tag hw-tag-hi">OpenClaw</span>
+          <span class="hw-tag hw-tag-hi">NemoClaw</span>
+          <span class="hw-tag">Air-gapped</span>
+          <span class="hw-tag">Dual-stack 2× = 2 PFLOP</span>
+          <span class="hw-tag">NIS2-kompatibel</span>
+        </div>
+      </div>
+
+      <!-- ASUS Ascent GX10 -->
+      <div class="hw-card">
+        <div class="hw-card-alt-badge">Alternativ</div>
+        <div class="hw-vendor">ASUS</div>
+        <div class="hw-model">Ascent GX10</div>
+        <div class="hw-model-sub">Desktop AI Supercomputer · GB10 Grace Blackwell</div>
+        <div class="hw-specs">
+          <div class="hw-spec">
+            <span class="hw-spec-label">Prestanda</span>
+            <span class="hw-spec-value">1 PFLOP FP4</span>
+          </div>
+          <div class="hw-spec">
+            <span class="hw-spec-label">Minne</span>
+            <span class="hw-spec-value">128 GB LPDDR5x</span>
+          </div>
+          <div class="hw-spec">
+            <span class="hw-spec-label">Lagring</span>
+            <span class="hw-spec-value">1 TB – 4 TB NVMe</span>
+          </div>
+          <div class="hw-spec">
+            <span class="hw-spec-label">OS</span>
+            <span class="hw-spec-value">DGX OS · NVIDIA stack</span>
+          </div>
+          <div class="hw-spec">
+            <span class="hw-spec-label">Nät</span>
+            <span class="hw-spec-value">ConnectX-7 · Wi-Fi 7</span>
+          </div>
+          <div class="hw-spec">
+            <span class="hw-spec-label">Formfaktor</span>
+            <span class="hw-spec-value">150 × 150 × 51 mm</span>
+          </div>
+        </div>
+        <div class="hw-role">
+          <div class="hw-role-label">Roll i openAut</div>
+          <div class="hw-role-text">Identisk chip som DGX Spark — <strong>samma prestanda, annat fabrikat</strong>. Certifierad för OpenClaw och NemoClaw. Välj baserat på tillgänglighet och pris.</div>
+        </div>
+        <div class="hw-tags">
+          <span class="hw-tag hw-tag-hi">OpenClaw</span>
+          <span class="hw-tag hw-tag-hi">NemoClaw</span>
+          <span class="hw-tag">Dual-stack 2× = 2 PFLOP</span>
+          <span class="hw-tag">Samma chip som DGX Spark</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- EDGE + I/O-LAGER -->
+  <div class="hw-group">
+    <div class="hw-group-header">
+      <span class="hw-group-pill pill-edge">Edge-lager</span>
+      <span class="hw-group-name">Fältanslutning · Protokolltranslation · Lokal reglering</span>
+    </div>
+
+    <div class="hw-grid hw-grid-2">
+
+      <!-- Siemens IOT2050 -->
+      <div class="hw-card">
+        <div class="hw-vendor">Siemens</div>
+        <div class="hw-model">SIMATIC IOT2050</div>
+        <div class="hw-model-sub">6ES7647-0BA00-1YA2 · Quad Core · High Security</div>
+        <div class="hw-specs">
+          <div class="hw-spec">
+            <span class="hw-spec-label">CPU</span>
+            <span class="hw-spec-value">TI AM6548 · 4× A53 · 1 GHz</span>
+          </div>
+          <div class="hw-spec">
+            <span class="hw-spec-label">Minne</span>
+            <span class="hw-spec-value">2 GB DDR4 · 16 GB eMMC</span>
+          </div>
+          <div class="hw-spec">
+            <span class="hw-spec-label">Seriellt</span>
+            <span class="hw-spec-value">RS232 / RS422 / RS485</span>
+          </div>
+          <div class="hw-spec">
+            <span class="hw-spec-label">Ethernet</span>
+            <span class="hw-spec-value">2× Gigabit RJ45</span>
+          </div>
+          <div class="hw-spec">
+            <span class="hw-spec-label">OS</span>
+            <span class="hw-spec-value">Linux · SSH nativt</span>
+          </div>
+          <div class="hw-spec">
+            <span class="hw-spec-label">Expansion</span>
+            <span class="hw-spec-value">Arduino Shield · Mini PCIe</span>
+          </div>
+        </div>
+        <div class="hw-role">
+          <div class="hw-role-label">Roll i openAut</div>
+          <div class="hw-role-text">Kör <strong>Python-regulator och datainsamlare</strong> via pymodbus och BAC0. OpenClaw deployer logik via SSH. Kommunicerar med EM1.8U och BMS via RS485 och Ethernet.</div>
+        </div>
+        <div class="hw-tags">
+          <span class="hw-tag hw-tag-hi">SSH-programmerbar</span>
+          <span class="hw-tag hw-tag-hi">ARM64</span>
+          <span class="hw-tag">Modbus RTU/TCP</span>
+          <span class="hw-tag">BACnet/IP</span>
+          <span class="hw-tag">DIN-rail</span>
+          <span class="hw-tag">−20 °C – +70 °C</span>
+        </div>
+      </div>
+
+      <!-- Siemens EM1.8U -->
+      <div class="hw-card">
+        <div class="hw-vendor">Siemens · Desigo Essentials</div>
+        <div class="hw-model">EM1.8U</div>
+        <div class="hw-model-sub">S55370-C204 · I/O Extension Module</div>
+        <div class="hw-specs">
+          <div class="hw-spec">
+            <span class="hw-spec-label">Kanaler</span>
+            <span class="hw-spec-value">8× universella I/O</span>
+          </div>
+          <div class="hw-spec">
+            <span class="hw-spec-label">Protokoll</span>
+            <span class="hw-spec-value">Modbus RTU · RS485</span>
+          </div>
+          <div class="hw-spec">
+            <span class="hw-spec-label">Signaltyper</span>
+            <span class="hw-spec-value">PT1000 · NTC10K · 4–20 mA</span>
+          </div>
+          <div class="hw-spec">
+            <span class="hw-spec-label">Signaltyper</span>
+            <span class="hw-spec-value">0–10V in · 0–10V ut · DI</span>
+          </div>
+          <div class="hw-spec">
+            <span class="hw-spec-label">Adressering</span>
+            <span class="hw-spec-value">Slave 1–31 · DIP-switch</span>
+          </div>
+          <div class="hw-spec">
+            <span class="hw-spec-label">Matning</span>
+            <span class="hw-spec-value">12–24 V DC</span>
+          </div>
+        </div>
+        <div class="hw-role">
+          <div class="hw-role-label">Roll i openAut</div>
+          <div class="hw-role-text">Industriell I/O till IOT2050 via RS485. Varje kanal konfigureras individuellt i mjukvara — <strong>en modul per rum</strong> i ventilationsprofilen. Upp till 31 moduler per buss = 248 universella I/O-punkter.</div>
+        </div>
+        <div class="hw-tags">
+          <span class="hw-tag hw-tag-hi">8× universal I/O</span>
+          <span class="hw-tag">Modbus RTU</span>
+          <span class="hw-tag">PT1000 · NTC · 4–20 mA</span>
+          <span class="hw-tag">0–10V ut</span>
+          <span class="hw-tag">DIN-rail</span>
+          <span class="hw-tag">Max 31 på buss</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <a href="/" class="footer-logo">open<span>Aut</span></a>
+  <div class="footer-meta">
+    MIT-licens · fritt att använda, modifiera och distribuera<br>
+    <a href="https://github.com/openaut">github.com/openaut</a> · <a href="/">openaut.io</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const NS='http://www.w3.org/2000/svg', XL='http://www.w3.org/1999/xlink';
+  const g=document.getElementById('dots');
+  const flows=[
+    {id:'l-bms',   c:'#facc15',r:2.4,dur:2.2,d:0  },{id:'l-bms',   c:'#facc15',r:1.5,dur:2.2,d:1.1},
+    {id:'l-iwms',  c:'#4ade80',r:2.4,dur:2.6,d:0.4},{id:'l-iwms',  c:'#4ade80',r:1.5,dur:2.6,d:1.5},
+    {id:'l-teams', c:'#8b7cf8',r:2.2,dur:1.6,d:0.2},{id:'l-teams', c:'#8b7cf8',r:1.5,dur:1.6,d:1.0},
+    {id:'l-sp',    c:'#8b7cf8',r:2.2,dur:1.2,d:0.6},{id:'l-sp',    c:'#8b7cf8',r:1.5,dur:1.2,d:0.0},
+    {id:'l-m-nc',  c:'#00dc82',r:2.4,dur:1.0,d:0.0},{id:'l-m-nc',  c:'#00dc82',r:1.5,dur:1.0,d:0.5},
+    {id:'l-nc-m',  c:'#00dc82',r:2.4,dur:1.0,d:0.3},{id:'l-nc-m',  c:'#00dc82',r:1.5,dur:1.0,d:0.8},
+    {id:'l-e1-nc', c:'#22d3ee',r:2.2,dur:2.0,d:0.0},{id:'l-e1-nc', c:'#22d3ee',r:1.4,dur:2.0,d:1.0},
+    {id:'l-e2-nc', c:'#22d3ee',r:2.2,dur:1.6,d:0.5},{id:'l-e2-nc', c:'#22d3ee',r:1.4,dur:1.6,d:1.3},
+    {id:'l-e3-nc', c:'#22d3ee',r:2.2,dur:1.8,d:0.2},{id:'l-e3-nc', c:'#22d3ee',r:1.4,dur:1.8,d:1.1},
+    {id:'l-e4-nc', c:'#22d3ee',r:2.2,dur:2.1,d:0.7},{id:'l-e4-nc', c:'#22d3ee',r:1.4,dur:2.1,d:1.7},
+    {id:'l-nc-e1', c:'#22d3ee',r:1.8,dur:2.4,d:0.3},
+    {id:'l-nc-e2', c:'#22d3ee',r:1.8,dur:1.8,d:0.9},
+    {id:'l-nc-e3', c:'#22d3ee',r:1.8,dur:2.0,d:0.1},
+    {id:'l-nc-e4', c:'#22d3ee',r:1.8,dur:2.2,d:1.2},
+    {id:'l-e1-m',  c:'#4ade80',r:2.2,dur:1.8,d:0.3},{id:'l-e1-m',  c:'#4ade80',r:1.4,dur:1.8,d:1.2},
+    {id:'l-e2-m',  c:'#4ade80',r:2.2,dur:2.2,d:0.8},{id:'l-e2-m',  c:'#4ade80',r:1.4,dur:2.2,d:1.7},
+    {id:'l-e3-m',  c:'#4ade80',r:2.2,dur:2.4,d:0.5},{id:'l-e3-m',  c:'#4ade80',r:1.4,dur:2.4,d:1.6},
+    {id:'l-e4-m',  c:'#4ade80',r:2.2,dur:2.6,d:0.1},{id:'l-e4-m',  c:'#4ade80',r:1.4,dur:2.6,d:1.4},
+    {id:'l-f1-e1', c:'#f59e0b',r:2.0,dur:1.8,d:0.0},{id:'l-f1-e1', c:'#f59e0b',r:1.3,dur:1.8,d:0.9},
+    {id:'l-f2-e1', c:'#f59e0b',r:2.0,dur:2.1,d:0.6},{id:'l-f2-e1', c:'#f59e0b',r:1.3,dur:2.1,d:1.4},
+    {id:'l-f3-e3', c:'#f59e0b',r:2.0,dur:1.6,d:0.3},{id:'l-f3-e3', c:'#f59e0b',r:1.3,dur:1.6,d:1.1},
+    {id:'l-f4-e3', c:'#f59e0b',r:2.0,dur:1.4,d:0.8},{id:'l-f4-e3', c:'#f59e0b',r:1.3,dur:1.4,d:0.1},
+    {id:'l-f5-e2', c:'#f59e0b',r:2.0,dur:2.5,d:0.2},{id:'l-f5-e2', c:'#f59e0b',r:1.3,dur:2.5,d:1.5},
+    {id:'l-f6-e4', c:'#f59e0b',r:2.0,dur:1.7,d:0.5},{id:'l-f6-e4', c:'#f59e0b',r:1.3,dur:1.7,d:1.1},
+  ];
+  flows.forEach(f=>{
+    const ref=document.getElementById(f.id); if(!ref) return;
+    const c=document.createElementNS(NS,'circle');
+    c.setAttribute('r',f.r); c.setAttribute('fill',f.c);
+    c.setAttribute('opacity',f.r>2?'0.95':'0.5');
+    c.style.filter=`drop-shadow(0 0 ${f.r}px ${f.c})`;
+    const am=document.createElementNS(NS,'animateMotion');
+    am.setAttribute('dur',f.dur+'s'); am.setAttribute('repeatCount','indefinite');
+    am.setAttribute('begin',f.d+'s'); am.setAttribute('calcMode','linear');
+    const mp=document.createElementNS(NS,'mpath');
+    mp.setAttributeNS(XL,'xlink:href','#'+f.id);
+    am.appendChild(mp); c.appendChild(am); g.appendChild(c);
+  });
+})();
+</script>
+</body>
+</html>
