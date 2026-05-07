@@ -1585,6 +1585,7 @@
     }
     section { padding: 4rem 1.5rem; }
     .hero { padding: 7rem 1.5rem 4rem; }
+    .hero-scroll { left: 1.5rem; }
     .problem-grid,
     .oss-layout,
     .hw-arch-note { grid-template-columns: 1fr; gap: 3rem; }
@@ -1593,13 +1594,21 @@
     .guided-callout { grid-template-columns: 1fr; }
     .arch-layer { border-right: none; border-bottom: 1px solid var(--border); }
     .scenario-cards,
-    .oss-cards { grid-template-columns: 1fr; }
+    .oss-cards { grid-template-columns: 1fr 1fr; }
     .hw-grid { grid-template-columns: 1fr; }
     .principle { grid-template-columns: 3rem 1fr; }
     .principle p { display: none; }
-    footer { flex-direction: column; gap: 1rem; text-align: center; }
+    footer { padding: 2rem 1.5rem; flex-direction: column; gap: 1rem; text-align: center; }
     .footer-meta { text-align: center; }
     .cta-btns { flex-direction: column; align-items: center; }
+    .cta { padding: 6rem 1.5rem; }
+  }
+
+  @media (max-width: 600px) {
+    .arch-diagram { grid-template-columns: 1fr; }
+    .scenario-cards,
+    .oss-cards { grid-template-columns: 1fr; }
+    .cta { padding: 5rem 1.5rem; }
   }
 </style>
 </head>
