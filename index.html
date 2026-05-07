@@ -1851,7 +1851,7 @@
           <span class="guided-step-num">01</span>
           <div>
             <h4>Installera edge-noden vid utrustningen</h4>
-            <p>En Moxa-nod (AIG-serien) monteras i närheten av anläggningsdelen — pump, kylmaskin, AHU. Den kör standard Linux och ansluts till OT-nätverket. NemoClaw når noden via <strong>SSH</strong> och installerar openAuts protokolldrivrutiner direkt. <strong>Ingen proprietär middleware krävs.</strong></p>
+            <p>En Siemens SIMATIC IOT2050 monteras i närheten av anläggningsdelen — pump, kylmaskin, AHU. Den kör standard Linux och ansluts till OT-nätverket. NemoClaw når noden via <strong>SSH</strong> och installerar openAuts protokolldrivrutiner direkt. <strong>Ingen proprietär middleware krävs.</strong></p>
           </div>
         </div>
 
@@ -2096,7 +2096,7 @@
     <div class="arch-layer">
       <div class="arch-layer-num">LAGER 02 — EDGE</div>
       <div class="arch-layer-name">Linux-baserade edge-noder</div>
-      <div class="arch-layer-desc">Moxa AIG-noder kör standard Linux och nås av NemoClaw via krypterad SSH. openAuts protokolldrivrutiner körs direkt på noden och läser data från fältutrustning via Modbus, M-Bus, LoRa eller annat fältprotokoll. Data transporteras krypterat till masterdatabasen via OPC UA eller MQTT over TLS — ingen proprietär middleware.</div>
+      <div class="arch-layer-desc">Siemens SIMATIC IOT2050-noder kör standard Linux och nås av NemoClaw via krypterad SSH. openAuts protokolldrivrutiner körs direkt på noden och läser data från fältutrustning via Modbus, M-Bus, LoRa eller annat fältprotokoll. Data transporteras krypterat till masterdatabasen via OPC UA eller MQTT over TLS — ingen proprietär middleware.</div>
       <div class="arch-user-view">NemoClaw sköter installation och konfiguration via SSH. Inga manuella ingrepp på noden. NemoClaw kan via samma SSH-åtkomst även driftsätta Python-baserade regleringsskript direkt på edge-noden. Skripten kör slutna reglerloopar mot lokal I/O — utan rundtur till AI-servern — och uppdateras, versionshanteras och återkallas centralt via NemoClaw. Regleringskod behandlas som konfiguration: granskningsbar, reproducerbar och alltid under operatörens kontroll.</div>
       <div class="arch-nodes">
         <div class="arch-node green">SSH-åtkomst (krypterad)</div>
