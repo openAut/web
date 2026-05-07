@@ -128,6 +128,35 @@
     font-weight: 700;
   }
 
+  .nav-hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    z-index: 101;
+  }
+
+  .nav-hamburger span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--green);
+    border-radius: 1px;
+    transition: transform 0.25s ease, opacity 0.2s ease;
+  }
+
+  nav.nav-open .nav-hamburger span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  nav.nav-open .nav-hamburger span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  nav.nav-open .nav-hamburger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  .nav-mobile-menu {
+    display: none;
+  }
+
   /* ── HERO ── */
   .hero {
     position: relative;
@@ -1527,8 +1556,33 @@
 
   /* ── RESPONSIVE ── */
   @media (max-width: 900px) {
-    nav { padding: 1rem 1.5rem; }
+    nav { padding: 1rem 1.5rem; flex-wrap: wrap; }
     .nav-links, .nav-badge { display: none; }
+    .nav-hamburger { display: flex; }
+
+    nav.nav-open .nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: absolute;
+      top: 100%;
+      left: 0; right: 0;
+      background: rgba(6,10,12,0.97);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem 1.5rem;
+      list-style: none;
+    }
+
+    nav.nav-open .nav-links li {
+      border-bottom: 1px solid rgba(0,220,130,0.08);
+    }
+
+    nav.nav-open .nav-links a {
+      display: block;
+      padding: 0.85rem 0;
+      font-size: 0.8rem;
+    }
     section { padding: 4rem 1.5rem; }
     .hero { padding: 7rem 1.5rem 4rem; }
     .problem-grid,
@@ -1565,6 +1619,11 @@
     <li><a href="/topologi.html">Topologi</a></li>
   </ul>
   <span class="nav-badge">MIT-licens</span>
+  <button class="nav-hamburger" aria-label="Öppna meny" aria-expanded="false">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
 </nav>
 
 <!-- HERO -->
@@ -2359,6 +2418,32 @@
   }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
 
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Hamburger menu
+  const navEl = document.querySelector('nav');
+  const hamburgerBtn = document.querySelector('.nav-hamburger');
+
+  hamburgerBtn.addEventListener('click', () => {
+    const isOpen = navEl.classList.toggle('nav-open');
+    hamburgerBtn.setAttribute('aria-expanded', isOpen);
+    hamburgerBtn.setAttribute('aria-label', isOpen ? 'Stäng meny' : 'Öppna meny');
+  });
+
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+      navEl.classList.remove('nav-open');
+      hamburgerBtn.setAttribute('aria-expanded', 'false');
+      hamburgerBtn.setAttribute('aria-label', 'Öppna meny');
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!navEl.contains(e.target)) {
+      navEl.classList.remove('nav-open');
+      hamburgerBtn.setAttribute('aria-expanded', 'false');
+      hamburgerBtn.setAttribute('aria-label', 'Öppna meny');
+    }
+  });
 </script>
 </body>
 </html>
