@@ -29,7 +29,7 @@ LAGER 01 — FÄLT         BACnet · Modbus RTU/TCP · M-Bus · OPC UA · LoRaWA
 
 **LAGER 01 — FÄLT:** Befintlig fältutrustning ansluts utan modifiering. PLC:er, DDC-regulatorer och mätare kommunicerar via sina befintliga protokoll. openAut läser — fältets reglering behåller prioritet.
 
-**LAGER 02 — EDGE:** Moxa AIG-noder eller Siemens SIMATIC IOT2050 kör standard Linux och nås av NemoClaw via krypterad SSH. Protokolldrivrutiner körs direkt på noden. NemoClaw kan via SSH även driftsätta Python-regleringsskript mot lokal I/O — slutna reglerloopar utan molnrundtur. Data transporteras krypterat via OPC UA (Basic256Sha256) eller MQTT over TLS.
+**LAGER 02 — EDGE:** Siemens SIMATIC IOT2050-noder kör standard Linux och nås av NemoClaw via krypterad SSH. Protokolldrivrutiner körs direkt på noden. NemoClaw kan via SSH även driftsätta Python-regleringsskript mot lokal I/O — slutna reglerloopar utan molnrundtur. Data transporteras krypterat via OPC UA (Basic256Sha256) eller MQTT over TLS.
 
 **LAGER 03 — AI:** NVIDIA DGX Spark (GB10 Grace Blackwell, 128 GB unified memory, 1 PFLOP FP4) kör NemoClaw och OpenClaw lokalt. MQTT-broker, LLM-inferens och FDD-modeller på samma hårdvara. All data stannar i fastigheten.
 
@@ -45,7 +45,7 @@ LAGER 01 — FÄLT         BACnet · Modbus RTU/TCP · M-Bus · OPC UA · LoRaWA
 | **NemoClaw** (agent) | Anthropic Claude Agent SDK · MCP · lokalt körd · ARM64 |
 | **OpenClaw** (LLM) | Öppen källkod · ≤200B parametrar · lokal inferens |
 | **AI-hårdvara** | NVIDIA DGX Spark · ASUS Ascent GX10 (alternativ) |
-| **Edge-hårdvara** | Siemens SIMATIC IOT2050 · Moxa AIG-serien |
+| **Edge-hårdvara** | Siemens SIMATIC IOT2050 |
 | **I/O-modul** | Siemens EM1.8U (8× universell I/O · Modbus RTU · RS485) |
 | **Transport** | OPC UA Basic256Sha256 · MQTT over TLS · WireGuard VPN |
 | **Databas** | PostgreSQL · TimescaleDB · Haystack · Brick Schema |
