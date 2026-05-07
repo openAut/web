@@ -1673,6 +1673,7 @@
     <span class="ticker-item accent">LOU-kompatibelt</span>
     <span class="ticker-item">IEC 62443 säkerhet</span>
     <span class="ticker-item accent">Anslut mot fältutrustning</span>
+    <span class="ticker-item">Python edge-reglering</span>
     <span class="ticker-item">Anomalidetektering</span>
     <span class="ticker-item accent">Energioptimering</span>
     <span class="ticker-item">Felsökning med AI-stöd</span>
@@ -1686,6 +1687,7 @@
     <span class="ticker-item accent">LOU-kompatibelt</span>
     <span class="ticker-item">IEC 62443 säkerhet</span>
     <span class="ticker-item accent">Anslut mot fältutrustning</span>
+    <span class="ticker-item">Python edge-reglering</span>
     <span class="ticker-item">Anomalidetektering</span>
     <span class="ticker-item accent">Energioptimering</span>
     <span class="ticker-item">Felsökning med AI-stöd</span>
@@ -2037,6 +2039,8 @@
           <span class="stack-chip green">Integrationsguide-skill</span>
           <span class="stack-chip green">Dokumentations-skill</span>
           <span class="stack-chip">SSH edge-access</span>
+          <span class="stack-chip">Python I/O-skill</span>
+          <span class="stack-chip">Edge-reglerings-skill</span>
           <span class="stack-chip">MQTT over TLS</span>
           <span class="stack-chip">OPC UA krypterad transport</span>
           <span class="stack-chip">Teams-integration</span>
@@ -2093,12 +2097,14 @@
       <div class="arch-layer-num">LAGER 02 — EDGE</div>
       <div class="arch-layer-name">Linux-baserade edge-noder</div>
       <div class="arch-layer-desc">Moxa AIG-noder kör standard Linux och nås av NemoClaw via krypterad SSH. openAuts protokolldrivrutiner körs direkt på noden och läser data från fältutrustning via Modbus, M-Bus, LoRa eller annat fältprotokoll. Data transporteras krypterat till masterdatabasen via OPC UA eller MQTT over TLS — ingen proprietär middleware.</div>
-      <div class="arch-user-view">NemoClaw sköter installation och konfiguration via SSH. Inga manuella ingrepp på noden.</div>
+      <div class="arch-user-view">NemoClaw sköter installation och konfiguration via SSH. Inga manuella ingrepp på noden. NemoClaw kan via samma SSH-åtkomst även driftsätta Python-baserade regleringsskript direkt på edge-noden. Skripten kör slutna reglerloopar mot lokal I/O — utan rundtur till AI-servern — och uppdateras, versionshanteras och återkallas centralt via NemoClaw. Regleringskod behandlas som konfiguration: granskningsbar, reproducerbar och alltid under operatörens kontroll.</div>
       <div class="arch-nodes">
         <div class="arch-node green">SSH-åtkomst (krypterad)</div>
         <div class="arch-node green">Modbus RTU / TCP</div>
         <div class="arch-node green">M-Bus · LoRa</div>
         <div class="arch-node green">Lokal 24–72h buffer</div>
+        <div class="arch-node green">Python edge-reglering</div>
+        <div class="arch-node green">Versionshanterad regelkod</div>
         <div class="arch-node cyan">→ OPC UA (Basic256Sha256)</div>
         <div class="arch-node cyan">→ MQTT over TLS</div>
       </div>
@@ -2155,7 +2161,7 @@
       <div>&nbsp;</div>
       <div><span class="t-prompt">openaut&gt; </span><span class="t-cmd">energirapport --period vecka --format pdf</span></div>
       <div><span class="t-success">✔ Rapport genererad: /rapporter/2025-V22-stadshus-a.pdf</span></div>
-      <div><span class="t-comment"># All analys är rådgivande — openAut skriver aldrig tillbaka till fältutrustning</span></div>
+      <div><span class="t-comment"># Reglering kräver explicit konfigurerad applikationsprofil — loggad och versionshanterad</span></div>
     </div>
   </div>
 </section>
@@ -2368,8 +2374,8 @@
   <div class="principles-list">
     <div class="principle reveal">
       <span class="principle-num">P.01</span>
-      <h3>Skriver tillbaka till fältutrustning</h3>
-      <p>openAut är skrivskyddat mot alla fältenheter. Reglering och styrning stannar helt hos fältets PLC:er och DDC-regulatorer. AI:n råder. Människor och fältstyrning beslutar.</p>
+      <h3>Reglering under kontroll — aldrig på autopilot</h3>
+      <p>openAut kan driftsätta Python-baserad reglering direkt på edge-noder via I/O, men bara när en applikationsprofil och ett explicit regleringsuppdrag har konfigurerats av behörig användare. All skrivåtkomst loggas, versionshanteras och kan återkallas. Fältets befintliga PLC:er och DDC-regulatorer behåller prioritet — openAut:s reglering är ett komplement, aldrig en override av säkerhetsfunktioner.</p>
     </div>
     <div class="principle reveal reveal-delay-1">
       <span class="principle-num">P.02</span>

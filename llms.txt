@@ -6,7 +6,7 @@
 - https://openaut.io/
 
 ## Summary
-openAut hjälper fastighetsägare att analysera byggnadsdata lokalt i den egna infrastrukturen. Plattformen är öppen källkod och designad för offentlig sektor, upphandling och långsiktig förvaltning.
+openAut hjälper fastighetsägare att analysera byggnadsdata och implementera Python-baserad reglering lokalt i den egna infrastrukturen, utan molntjänster eller leverantörsinlåsning. Plattformen är öppen källkod och designad för offentlig sektor, upphandling och långsiktig förvaltning.
 
 ## Indexing and crawler policy
 - Public website content may be indexed by search engines and AI/LLM crawlers.
