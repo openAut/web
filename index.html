@@ -1742,16 +1742,16 @@
       <h3>AI ser vad BMS-larmet inte förklarar</h3>
       <div class="scenario-timeline">
         <div class="scenario-event">
-          <span class="event-time">03:22</span>
-          <div class="event-text">BMS genererar regleravvikelselarm på shuntgrupp VVS-12. Framledning <em>+8 °C över börvärde</em> trots att ventil V-12 rapporterar 0 % öppning.</div>
+          <span class="event-time">Måndag 06:00</span>
+          <div class="event-text">openAut läser energimätardata från fjärrvärmecentralen FJV01 och jämför primärsidans flöde mot levererad effekt på sekundärsidan. Identifierar en avvikelse som vuxit under 11 veckor: samma mängd energi ut — men primärsidan kräver allt högre flöde för att leverera den.<br><br>Primärsidans returtemperatur har stigit från 38 °C till 51 °C. Fjärrvärmeleverantörens avtalsgräns är 45 °C.</div>
         </div>
         <div class="scenario-event">
-          <span class="event-time">03:23</span>
-          <div class="event-text">openAut korrelerar tre signaler: ventilläge 0 %, framledning 64 °C (börvärde 56 °C), returtemperatur följer framledningen utan normalt ΔT. <strong>Slutsats: ventilen är mekaniskt fastsatt i öppet läge — lägesgivaren visar fel.</strong></div>
+          <span class="event-time">06:01</span>
+          <div class="event-text">openAut hämtar information för FJV01 ur masterdatabasen. Identifierar att anläggningen har en plattvärmeväxlare installerad 2019 utan dokumenterat servicetillfälle. Korrelerar trenden mot historiska driftdata — mönstret är konsistent med beläggning på värmeväxlarens primärsida.<br><br>BMS larmar inte. Sekundärsidan levererar rätt temperatur. Felet syns bara i relationen mellan primär- och sekundärsidans energibalanser — två datakällor som BMS aldrig ställer mot varandra.</div>
         </div>
         <div class="scenario-event">
-          <span class="event-time">06:45</span>
-          <div class="event-text">Drifttekniker får Teams-notis med diagnos och åtgärdsförslag: kontrollera ställdon V-12, trolig aktuatorfel eller mekanisk blockering. <em>Ingen överhettning av zon — felet löst vid öppning.</em></div>
+          <span class="event-time">06:15</span>
+          <div class="event-text">Energisamordnaren får avvikelserapport i Teams:<br><br><strong>FJV01 visar försämrad värmeöverföring under 11 veckor. Primärsidans returtemperatur överskrider nu avtalsgränsen mot fjärrvärmeleverantören — risk för tilläggsdebitering vid nästa avläsning. Trolig orsak: beläggning i plattvärmeväxlare. Kemtvätt rekommenderas inom 2 veckor. Estimerad kostnad för utebliven åtgärd: 40–60 tkr/kvartal i förhöjd fjärrvärmekostnad plus eventuellt avtalsvite.</strong><br><br><em>Sekundärsidan fungerade perfekt. Det var relationen mellan systemen som avslöjade felet.</em></div>
         </div>
       </div>
     </div>
