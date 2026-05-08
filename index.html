@@ -1715,16 +1715,24 @@
       <h3>Felsökning utan att öppna BMS-klienten</h3>
       <div class="scenario-timeline">
         <div class="scenario-event">
-          <span class="event-time">06:14</span>
-          <div class="event-text">LA03 visar avvikande tillufttemperatur — 34 °C mot börvärde 18 °C. openAut korrelerar med värmebatteriets returvattentemperatur (följer framledningen utan normalt ΔT) och avvikelse mellan ventilkommando och ventilåtermelding på SV01 sedan 03:40.</div>
+          <span class="event-time">03:22</span>
+          <div class="event-text">BMS genererar regleravvikelselarm på By05 LA03: framledningstemperaturgivare GT04 visar 21 °C — långt under börvärde 56 °C. Larmet skrivs till masterdatabasen.</div>
         </div>
         <div class="scenario-event">
-          <span class="event-time">06:19</span>
-          <div class="event-text">Teams-notis: <strong>Trolig orsak: värmeventil SV01 stänger inte vid 0 % kommando (87 % konfidens) — troligt hysteresfel eller mekanisk blockering i ställdon.</strong> Kontrollera aktuatorfeedback och ställdonets mekaniska rörelse.</div>
+          <span class="event-time">03:23</span>
+          <div class="event-text">openAut fångar larmet. Hämtar driftkortet för LA03 från masterdatabasen — identifierar att givaren mäter framledningstemperatur på värmebatteriet i LA03 och styrs via styrventil SV01. Läser aktuell driftstatus: SV01 rapporterar 100 % öppning. GT04 visar 21 °C. Slutsats: ventilen kommenderas fullt öppen men värme uteblir — felet ligger troligen inte i ventilen utan i styrsignalen till ställdonet.<br><br>openAut hämtar AS-schemat för LA03 ur masterdatabasen och identifierar att utsignalen till SV01:s ställdon utgår från analog utgångsmodul och trådad till plint 201 och 202 i apparatskåp AS03. Signalen ska vara 0–10 VDC.</div>
         </div>
         <div class="scenario-event">
-          <span class="event-time">08:30</span>
-          <div class="event-text">Teknikern byter ställdon på SV01. <em>Fel åtgärdat på 2 timmar</em> — innan hyresgästerna klagat.</div>
+          <span class="event-time">06:45</span>
+          <div class="event-text">Teams-notis till drifttekniker:<br><br><strong>SV01 kommenderas 100 % men GT04 visar 21 °C — värmen uteblir trots fullt öppningskommando. Kontrollera spänningen mellan plint 201 och 202 i AS03. Vid korrekt funktion ska du mäta 10 VDC.</strong></div>
+        </div>
+        <div class="scenario-event">
+          <span class="event-time">07:10</span>
+          <div class="event-text">Teknikern i Teams: "Mäter 0 VDC mellan plint 201 och 202."<br>openAut svarar:<br><br><strong>0 VDC bekräftar att styrsignalen aldrig når ställdonet. Trolig orsak: fel på analog utgångsmodul eller felaktigt programvärde i regulatorn. Kontrollera modulstatus i BMS-klienten — byt modul om ingen hårdvaruindikering syns.</strong></div>
+        </div>
+        <div class="scenario-event">
+          <span class="event-time">08:15</span>
+          <div class="event-text">Teknikern byter analog utgångsmodul. Mäter 10 VDC på plint 201–202. GT04 stiger mot börvärde. Larmet kvitteras i masterdatabasen.<br><em>Fel åtgärdat på 5 timmar — utan att teknikern öppnade ett enda pappersschema.</em></div>
         </div>
       </div>
     </div>
