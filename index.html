@@ -1716,15 +1716,15 @@
       <div class="scenario-timeline">
         <div class="scenario-event">
           <span class="event-time">06:14</span>
-          <div class="event-text">AHU-03 visar avvikande tillufttemperatur. openAut korrelerar med returtemperatur och SFP-ökning sedan natten.</div>
+          <div class="event-text">LA03 visar avvikande tillufttemperatur. openAut korrelerar med returtemperatur och SFP-ökning sedan natten.</div>
         </div>
         <div class="scenario-event">
           <span class="event-time">06:19</span>
-          <div class="event-text">Teams-notis: <strong>Trolig orsak: värmeventil CV-103 har hysteresfel (87% konfidens).</strong> Kontrollera aktuatorfeedback.</div>
+          <div class="event-text">Teams-notis: <strong>Trolig orsak: värmeventil SV01 har hysteresfel (87% konfidens).</strong> Kontrollera aktuatorfeedback.</div>
         </div>
         <div class="scenario-event">
           <span class="event-time">08:30</span>
-          <div class="event-text">Teknikern åtgärdar CV-103. <em>Fel åtgärdat på 2 timmar</em> — innan hyresgästerna klagat.</div>
+          <div class="event-text">Teknikern åtgärdar SV01. <em>Fel åtgärdat på 2 timmar</em> — innan hyresgästerna klagat.</div>
         </div>
       </div>
     </div>
@@ -2152,12 +2152,12 @@
       <div><span class="t-prompt">openaut&gt; </span><span class="t-cmd">status --byggnad "Stadshus-A"</span></div>
       <div><span class="t-output">▸ 312 datapunkter online  ·  3 aktiva avvikelser  ·  senaste synk 4s sedan</span></div>
       <div>&nbsp;</div>
-      <div><span class="t-prompt">openaut&gt; </span><span class="t-cmd">diagnostik --system AHU-03</span></div>
-      <div><span class="t-output">Analyserar 72h trenddata för AHU-03...</span></div>
+      <div><span class="t-prompt">openaut&gt; </span><span class="t-cmd">diagnostik --system LA03</span></div>
+      <div><span class="t-output">Analyserar 72h trenddata för LA03...</span></div>
       <div><span class="t-success">✔ Tillufttemperaturavvikelse detekterad sedan 06:14</span></div>
-      <div><span class="t-output">  Rotorsak (87% konfidens): hysteresfel på värmeventil CV-103</span></div>
-      <div><span class="t-output">  Korrelerat: Tillufttemperatur +34°C med 0% utsignal på CV-103</span></div>
-      <div><span class="t-output">  Åtgärd: Kontrollera ventil och ventilställdon CV-103</span></div>
+      <div><span class="t-output">  Rotorsak (87% konfidens): hysteresfel på värmeventil SV01</span></div>
+      <div><span class="t-output">  Korrelerat: Tillufttemperatur +34°C med 0% utsignal på SV01</span></div>
+      <div><span class="t-output">  Åtgärd: Kontrollera ventil och ventilställdon SV01</span></div>
       <div>&nbsp;</div>
       <div><span class="t-prompt">openaut&gt; </span><span class="t-cmd">energirapport --period vecka --format pdf</span></div>
       <div><span class="t-success">✔ Rapport genererad: /rapporter/2025-V22-stadshus-a.pdf</span></div>
