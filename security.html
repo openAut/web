@@ -1,0 +1,2127 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>openAut Security — IT/OT-säkerhetsagent</title>
+<meta name="description" content="openAuts separata IT/OT-säkerhetsagent: passiv övervakning, read-only SSH, listen-only Teams-bot och arkitektonisk isolation från driftinstansen.">
+<link rel="canonical" href="https://openaut.io/security.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:          #060a0c;
+  --surface:     #0d1519;
+  --surface2:    #111d22;
+  --surface3:    #0e1018;
+  --border:      rgba(0,220,130,0.12);
+  --border-sec:  rgba(255,77,77,0.18);
+  --green:       #00dc82;
+  --green-dim:   rgba(0,220,130,0.55);
+  --green-glow:  rgba(0,220,130,0.06);
+  --red:         #ff4d4d;
+  --red-dim:     rgba(255,77,77,0.55);
+  --red-glow:    rgba(255,77,77,0.07);
+  --red-surface: rgba(255,77,77,0.05);
+  --amber:       #f5a623;
+  --amber-glow:  rgba(245,166,35,0.07);
+  --cyan:        #00c8e0;
+  --text:        #e2ede8;
+  --text-muted:  #92b0a2;
+  --text-dim:    #607a6e;
+  --mono:        'Space Mono', monospace;
+  --display:     'Syne', sans-serif;
+  --body:        'Inter', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 999; opacity: 0.4;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 1.1rem 3rem;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid var(--border);
+  background: rgba(6,10,12,0.92);
+  backdrop-filter: blur(14px);
+}
+.nav-back {
+  font-family: var(--mono); font-size: 0.68rem;
+  color: var(--text-muted); text-decoration: none;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  display: flex; align-items: center; gap: 0.6rem;
+  transition: color 0.2s;
+}
+.nav-back::before { content: '←'; color: var(--green); }
+.nav-back:hover { color: var(--green); }
+.nav-logo {
+  font-family: var(--mono); font-size: 1rem;
+  color: var(--red); letter-spacing: 0.05em; text-decoration: none;
+}
+.nav-logo span { color: var(--text-muted); }
+.nav-badge {
+  font-family: var(--mono); font-size: 0.65rem;
+  color: var(--bg); background: var(--red);
+  padding: 0.28rem 0.8rem; letter-spacing: 0.1em;
+  text-transform: uppercase; font-weight: 700;
+}
+
+/* ── GRID BG ── */
+.grid-bg {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,77,77,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,77,77,0.025) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+
+/* ── HERO ── */
+.hero {
+  position: relative; min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 8rem 4rem 4rem; overflow: hidden;
+}
+.hero-glow {
+  position: absolute; top: -15%; right: -10%;
+  width: 65%; height: 70%;
+  background: radial-gradient(ellipse, rgba(255,77,77,0.06) 0%, transparent 65%);
+  pointer-events: none;
+}
+.hero-glow-2 {
+  position: absolute; bottom: 0; left: -5%;
+  width: 45%; height: 55%;
+  background: radial-gradient(ellipse, rgba(0,200,224,0.03) 0%, transparent 65%);
+  pointer-events: none;
+}
+.hero-eyebrow {
+  font-family: var(--mono); font-size: 0.72rem;
+  color: var(--red); letter-spacing: 0.2em; text-transform: uppercase;
+  margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 0.8rem;
+  opacity: 0; animation: fadeUp 0.8s ease forwards 0.2s;
+}
+.hero-eyebrow::before {
+  content: ''; display: block;
+  width: 32px; height: 1px; background: var(--red);
+}
+.hero-title {
+  font-family: var(--display);
+  font-size: clamp(2.6rem, 6vw, 6rem);
+  font-weight: 800; line-height: 1.0;
+  letter-spacing: -0.025em; max-width: 22ch;
+  opacity: 0; animation: fadeUp 0.8s ease forwards 0.4s;
+}
+.hero-title em { font-style: normal; color: var(--red); }
+.hero-title .g  { color: var(--green); }
+.hero-sub {
+  margin-top: 2.5rem; font-size: 1.1rem; font-weight: 300;
+  color: var(--text-muted); max-width: 58ch; line-height: 1.9;
+  opacity: 0; animation: fadeUp 0.8s ease forwards 0.6s;
+}
+.hero-sub strong { color: var(--text); font-weight: 500; }
+
+.hero-pills {
+  margin-top: 3rem; display: flex; flex-wrap: wrap; gap: 0.8rem;
+  opacity: 0; animation: fadeUp 0.8s ease forwards 0.8s;
+}
+.pill {
+  font-family: var(--mono); font-size: 0.65rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0.45rem 1rem; border: 1px solid;
+}
+.pill-red   { color: var(--red);   border-color: rgba(255,77,77,0.35); background: rgba(255,77,77,0.05); }
+.pill-green { color: var(--green); border-color: rgba(0,220,130,0.3);  background: rgba(0,220,130,0.04); }
+.pill-amber { color: var(--amber); border-color: rgba(245,166,35,0.3); background: rgba(245,166,35,0.04); }
+.pill-dim   { color: var(--text-muted); border-color: var(--border); }
+
+.hero-scroll {
+  position: absolute; bottom: 2.5rem; left: 4rem;
+  font-family: var(--mono); font-size: 0.65rem;
+  color: var(--text-dim); letter-spacing: 0.15em; text-transform: uppercase;
+  display: flex; align-items: center; gap: 0.8rem;
+  opacity: 0; animation: fadeUp 0.8s ease forwards 1.2s;
+}
+.hero-scroll::after {
+  content: ''; display: block;
+  width: 1px; height: 40px;
+  background: linear-gradient(to bottom, var(--text-dim), transparent);
+  animation: scrollLine 1.5s ease-in-out infinite;
+}
+
+/* ── TICKER ── */
+.ticker {
+  border-top: 1px solid var(--border-sec);
+  border-bottom: 1px solid var(--border-sec);
+  background: var(--surface3); padding: 0.8rem 0; overflow: hidden;
+}
+.ticker-track {
+  display: flex; animation: ticker 35s linear infinite; width: max-content;
+}
+.ticker-item {
+  font-family: var(--mono); font-size: 0.68rem; color: var(--text-muted);
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 0 2.5rem; white-space: nowrap;
+  border-right: 1px solid var(--border-sec);
+}
+.ticker-item.red   { color: var(--red); }
+.ticker-item.amber { color: var(--amber); }
+.ticker-item.green { color: var(--green); }
+
+/* ── SECTION LAYOUT ── */
+section { padding: 7rem 4rem; position: relative; }
+.section-label {
+  font-family: var(--mono); font-size: 0.68rem; color: var(--red);
+  letter-spacing: 0.25em; text-transform: uppercase;
+  margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 1rem;
+}
+.section-label::before {
+  content: attr(data-num); color: var(--text-dim); font-size: 0.6rem;
+}
+.section-label.green { color: var(--green); }
+
+.section-title {
+  font-family: var(--display);
+  font-size: clamp(2rem, 4vw, 3.6rem);
+  font-weight: 800; line-height: 1.05;
+  letter-spacing: -0.02em; max-width: 24ch;
+}
+.section-title .accent-red   { color: var(--red); }
+.section-title .accent-green { color: var(--green); }
+
+/* ── SEPARATION PRINCIPLES ── */
+.principles-hero {
+  background: var(--surface3);
+  border-top: 1px solid var(--border-sec);
+  border-bottom: 1px solid var(--border-sec);
+}
+.principles-intro {
+  max-width: 60ch; color: var(--text-muted); font-size: 1.05rem;
+  font-weight: 300; line-height: 1.85; margin-top: 2rem;
+}
+.principles-intro strong { color: var(--text); font-weight: 500; }
+
+.three-principles {
+  margin-top: 4rem;
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 0; border: 1px solid var(--border-sec); background: var(--border-sec);
+}
+.tp-card {
+  background: var(--bg); padding: 2.8rem 2.2rem;
+  display: flex; flex-direction: column; gap: 1.2rem;
+  transition: background 0.3s;
+}
+.tp-card:hover { background: var(--red-surface); }
+.tp-num {
+  font-family: var(--mono); font-size: 0.6rem; color: var(--text-dim);
+  letter-spacing: 0.2em;
+}
+.tp-icon {
+  font-size: 1.8rem; line-height: 1;
+}
+.tp-card h3 {
+  font-family: var(--display); font-size: 1.1rem;
+  font-weight: 800; color: var(--text);
+  letter-spacing: -0.01em; line-height: 1.25;
+}
+.tp-card h3 em { font-style: normal; color: var(--red); }
+.tp-card p {
+  font-size: 0.88rem; color: var(--text-muted);
+  font-weight: 300; line-height: 1.75; flex: 1;
+}
+.tp-card p strong { color: var(--text); font-weight: 500; }
+.tp-card p em { color: var(--green); font-style: normal; }
+.tp-verdict {
+  font-family: var(--mono); font-size: 0.68rem;
+  border-left: 2px solid var(--red); padding-left: 0.75rem;
+  color: var(--red); line-height: 1.5; opacity: 0.85;
+}
+
+/* ── ARCH DIAGRAM ── */
+.arch-section { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+
+.arch-diagram {
+  margin-top: 4rem; position: relative;
+  display: grid; grid-template-columns: 1fr 80px 1fr;
+  gap: 0; align-items: stretch;
+  border: 1px solid var(--border-sec);
+}
+.arch-instance {
+  padding: 2.5rem 2rem;
+  display: flex; flex-direction: column; gap: 1rem;
+}
+.arch-instance.main  { background: rgba(0,220,130,0.04); border-right: 1px solid var(--border-sec); }
+.arch-instance.sec   { background: rgba(255,77,77,0.04); border-left:  1px solid var(--border-sec); }
+.arch-inst-badge {
+  font-family: var(--mono); font-size: 0.6rem;
+  color: var(--bg); padding: 0.25rem 0.7rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  font-weight: 700; display: inline-block; width: fit-content;
+}
+.badge-main { background: var(--green); }
+.badge-sec  { background: var(--red); }
+.arch-inst-name {
+  font-family: var(--display); font-size: 1.4rem;
+  font-weight: 800; letter-spacing: -0.02em;
+}
+.arch-inst-name.green { color: var(--green); }
+.arch-inst-name.red   { color: var(--red); }
+.arch-inst-hw {
+  font-family: var(--mono); font-size: 0.68rem;
+  color: var(--text-muted); letter-spacing: 0.04em;
+}
+.arch-nodes { display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.5rem; }
+.arch-node {
+  font-family: var(--mono); font-size: 0.63rem; color: var(--text-muted);
+  background: var(--surface2); padding: 0.35rem 0.6rem;
+  border-left: 2px solid var(--border); letter-spacing: 0.04em;
+}
+.arch-node.green { color: var(--green); border-left-color: var(--green); }
+.arch-node.red   { color: var(--red);   border-left-color: var(--red); }
+.arch-node.amber { color: var(--amber); border-left-color: var(--amber); }
+.arch-node.cyan  { color: var(--cyan);  border-left-color: var(--cyan); }
+
+.arch-connector {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 0.6rem;
+  background: var(--surface2); border-left: 1px solid var(--border-sec); border-right: 1px solid var(--border-sec);
+  padding: 2rem 0;
+}
+.arch-conn-arrow {
+  font-family: var(--mono); font-size: 0.7rem; color: var(--text-dim);
+  writing-mode: vertical-rl; letter-spacing: 0.15em; text-transform: uppercase;
+}
+.arch-conn-label {
+  font-family: var(--mono); font-size: 0.55rem; color: var(--green);
+  letter-spacing: 0.12em; text-transform: uppercase;
+  background: rgba(0,220,130,0.08); padding: 0.3rem 0.5rem;
+  border: 1px solid rgba(0,220,130,0.25);
+  writing-mode: vertical-rl;
+}
+.arch-conn-block {
+  font-family: var(--mono); font-size: 0.55rem; color: var(--red);
+  letter-spacing: 0.1em; text-transform: uppercase;
+  background: rgba(255,77,77,0.08); padding: 0.3rem 0.5rem;
+  border: 1px solid rgba(255,77,77,0.25);
+  writing-mode: vertical-rl;
+}
+
+/* ── SSH BLOCK ── */
+.ssh-section { position: relative; overflow: hidden; }
+
+.ssh-grid {
+  margin-top: 4rem;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 4rem; align-items: start;
+}
+.ssh-text p {
+  font-size: 1rem; color: var(--text-muted); font-weight: 300;
+  line-height: 1.9; margin-top: 1.4rem;
+}
+.ssh-text p:first-child { margin-top: 0; }
+.ssh-text p strong { color: var(--text); font-weight: 500; }
+.ssh-text p em { color: var(--red); font-style: normal; }
+
+.ssh-permissions {
+  border: 1px solid var(--border-sec); background: var(--surface2);
+}
+.ssh-perm-header {
+  background: var(--surface); padding: 0.8rem 1.4rem;
+  display: flex; align-items: center; gap: 0.6rem;
+  border-bottom: 1px solid var(--border-sec);
+  font-family: var(--mono); font-size: 0.65rem;
+  color: var(--text-dim); letter-spacing: 0.1em;
+}
+.ssh-perm-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); }
+.ssh-perm-body { padding: 1.6rem 1.4rem; display: flex; flex-direction: column; gap: 0; }
+.ssh-perm-row {
+  display: grid; grid-template-columns: 1.8rem 14rem 1fr;
+  gap: 0.8rem; padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(255,77,77,0.07);
+  align-items: start;
+}
+.ssh-perm-row:last-child { border-bottom: none; }
+.perm-icon { font-size: 0.85rem; padding-top: 0.05rem; }
+.perm-name {
+  font-family: var(--mono); font-size: 0.7rem;
+  color: var(--text-muted); letter-spacing: 0.04em;
+  padding-top: 0.05rem;
+}
+.perm-badge {
+  font-family: var(--mono); font-size: 0.58rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0.2rem 0.55rem; width: fit-content;
+  font-weight: 700;
+}
+.pb-read   { background: rgba(0,220,130,0.15); color: var(--green); border: 1px solid rgba(0,220,130,0.25); }
+.pb-deny   { background: rgba(255,77,77,0.15);  color: var(--red);   border: 1px solid rgba(255,77,77,0.25); }
+
+.ssh-cmd-block {
+  margin-top: 3rem; border: 1px solid var(--border-sec);
+  background: var(--surface2);
+}
+.ssh-cmd-header {
+  background: var(--surface); padding: 0.7rem 1.2rem;
+  display: flex; align-items: center; gap: 0.5rem;
+  border-bottom: 1px solid var(--border-sec);
+}
+.ssh-cmd-dot { width: 8px; height: 8px; border-radius: 50%; }
+.d1 { background: var(--red); } .d2 { background: var(--amber); } .d3 { background: var(--green); }
+.ssh-cmd-title {
+  font-family: var(--mono); font-size: 0.65rem;
+  color: var(--text-muted); letter-spacing: 0.1em; margin-left: 0.5rem;
+}
+.ssh-cmd-body {
+  padding: 1.6rem 1.8rem; font-family: var(--mono);
+  font-size: 0.76rem; line-height: 2;
+}
+.t-sec-prompt { color: var(--red); }
+.t-blank { height: 0.8rem; }
+.t-cmd     { color: var(--text); }
+.t-output  { color: var(--cyan); }
+.t-comment { color: var(--text-muted); }
+.t-ok      { color: var(--green); }
+.t-deny    { color: var(--red); }
+.t-warn    { color: var(--amber); }
+
+/* ── TEAMS MONITORING ── */
+.teams-section {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.teams-layout {
+  margin-top: 4rem;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 4rem; align-items: start;
+}
+
+.teams-mock {
+  border: 1px solid var(--border-sec);
+  background: var(--surface2);
+}
+.teams-header {
+  background: #1a1f2e; padding: 0.75rem 1.2rem;
+  display: flex; align-items: center; gap: 0.75rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.teams-icon-main {
+  width: 28px; height: 28px; background: #5b5fc7; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 0.6rem; font-weight: 700;
+  color: #fff; letter-spacing: 0.05em; flex-shrink: 0;
+}
+.teams-icon-sec {
+  width: 28px; height: 28px; background: #7c2020; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 0.6rem; font-weight: 700;
+  color: #ffb3b3; letter-spacing: 0.05em; flex-shrink: 0;
+  border: 1px solid rgba(255,77,77,0.4);
+}
+.teams-channel {
+  font-size: 0.8rem; color: rgba(255,255,255,0.7); font-weight: 500;
+}
+.teams-channel span { color: rgba(255,255,255,0.3); font-weight: 400; margin-left: 0.4rem; }
+.teams-body {
+  padding: 1.2rem; display: flex; flex-direction: column; gap: 1.1rem;
+}
+.teams-msg {
+  display: grid; grid-template-columns: 32px 1fr;
+  gap: 0.7rem; align-items: start;
+}
+.teams-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 0.6rem; font-weight: 700;
+  color: var(--bg); flex-shrink: 0; margin-top: 0.1rem;
+}
+.av-human { background: #6b8a7a; }
+.av-ai    { background: var(--green); }
+.av-sec   { background: var(--red); }
+.av-bad   { background: #555; color: #ccc; }
+
+.teams-name { font-size: 0.68rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem; letter-spacing: 0.02em; }
+.teams-name.ai-name  { color: var(--green); }
+.teams-name.sec-name { color: var(--red); }
+.teams-text { font-size: 0.8rem; color: var(--text-muted); font-weight: 300; line-height: 1.6; }
+.teams-text strong { color: var(--text); font-weight: 500; }
+.teams-text em { color: var(--amber); font-style: normal; }
+.teams-text code { font-family: var(--mono); font-size: 0.73em; color: var(--cyan); background: rgba(0,200,224,0.08); padding: 0.1em 0.35em; }
+.teams-text .bad { color: var(--red); font-style: italic; }
+
+.teams-divider {
+  text-align: center; font-family: var(--mono);
+  font-size: 0.56rem; color: var(--text-muted); letter-spacing: 0.12em;
+  text-transform: uppercase; border-top: 1px dashed rgba(255,77,77,0.18);
+  padding-top: 0.7rem; margin-top: 0.2rem;
+}
+
+.sec-alert-banner {
+  border: 1px solid rgba(255,77,77,0.35); background: rgba(255,77,77,0.07);
+  padding: 0.7rem 1rem; display: flex; align-items: flex-start; gap: 0.7rem;
+  margin-top: 0.5rem;
+}
+.sec-alert-icon { color: var(--red); font-size: 0.85rem; padding-top: 0.05rem; flex-shrink: 0; }
+.sec-alert-text { font-family: var(--mono); font-size: 0.63rem; color: var(--red); line-height: 1.55; letter-spacing: 0.03em; }
+
+.no-response-note {
+  background: rgba(255,77,77,0.05); border: 1px solid rgba(255,77,77,0.15);
+  border-left: 3px solid var(--red); padding: 1rem 1.2rem;
+  font-family: var(--mono); font-size: 0.7rem; color: var(--text-dim);
+  letter-spacing: 0.04em; line-height: 1.6; margin-top: 0.4rem;
+}
+.no-response-note strong { color: var(--red); }
+
+/* Teams listen principles */
+.listen-principles {
+  display: flex; flex-direction: column; gap: 0;
+}
+.listen-p {
+  padding: 1.6rem 0; border-bottom: 1px solid var(--border-sec);
+  display: grid; grid-template-columns: 2.8rem 1fr; gap: 1rem;
+  align-items: start;
+}
+.listen-p:first-child { border-top: 1px solid var(--border-sec); }
+.listen-p-num {
+  font-family: var(--mono); font-size: 0.62rem;
+  color: var(--red); padding-top: 0.2rem; letter-spacing: 0.08em;
+}
+.listen-p h4 {
+  font-family: var(--display); font-size: 0.95rem; font-weight: 700;
+  color: var(--text); margin-bottom: 0.35rem; letter-spacing: -0.01em;
+}
+.listen-p p {
+  font-size: 0.84rem; color: var(--text-muted); font-weight: 300; line-height: 1.65;
+}
+.listen-p p strong { color: var(--text); font-weight: 500; }
+.listen-p p em { color: var(--green); font-style: normal; }
+
+/* ── THREAT MODEL ── */
+.threats { position: relative; overflow: hidden; }
+.threats-intro {
+  max-width: 62ch; color: var(--text-muted); font-size: 1.05rem;
+  font-weight: 300; line-height: 1.85; margin-top: 2rem;
+}
+.threats-intro strong { color: var(--text); font-weight: 500; }
+
+.threat-cols {
+  margin-top: 4rem;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1px; background: var(--border-sec);
+  border: 1px solid var(--border-sec);
+}
+.threat-col {
+  background: var(--bg); padding: 2.5rem 2.2rem;
+}
+.threat-col-label {
+  font-family: var(--mono); font-size: 0.62rem;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  margin-bottom: 1.8rem; display: flex; align-items: center; gap: 0.6rem;
+  padding-bottom: 1rem; border-bottom: 1px solid var(--border-sec);
+}
+.threat-col-label.it  { color: var(--red); }
+.threat-col-label.ot  { color: var(--amber); }
+.threat-col-label::before {
+  content: ''; display: block; width: 20px; height: 1px;
+}
+.threat-col-label.it::before  { background: var(--red); }
+.threat-col-label.ot::before  { background: var(--amber); }
+
+.threat-list { display: flex; flex-direction: column; gap: 0; }
+.threat-item {
+  padding: 1.1rem 0; border-bottom: 1px solid rgba(255,77,77,0.06);
+  display: grid; grid-template-columns: 1.6rem 1fr; gap: 0.8rem;
+  align-items: start;
+}
+.threat-item:last-child { border-bottom: none; }
+.threat-item-icon { font-size: 0.85rem; padding-top: 0.1rem; }
+.threat-item-body h5 {
+  font-family: var(--display); font-size: 0.88rem; font-weight: 700;
+  color: var(--text); margin-bottom: 0.25rem; letter-spacing: -0.01em;
+}
+.threat-item-body p {
+  font-size: 0.8rem; color: var(--text-muted); font-weight: 300; line-height: 1.6;
+}
+.threat-item-body p em { color: var(--red); font-style: normal; }
+
+/* ── ALERT FLOW ── */
+.alert-section { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.alert-intro { max-width: 60ch; color: var(--text-muted); font-size: 1.05rem; font-weight: 300; line-height: 1.85; margin-top: 2rem; }
+.alert-intro strong { color: var(--text); font-weight: 500; }
+
+.alert-flow {
+  margin-top: 4rem; display: flex; flex-direction: column; gap: 0;
+  border: 1px solid var(--border-sec);
+}
+.alert-step {
+  display: grid; grid-template-columns: 220px 1fr;
+  border-bottom: 1px solid var(--border-sec);
+  transition: background 0.25s;
+}
+.alert-step:last-child { border-bottom: none; }
+.alert-step:hover { background: var(--red-surface); }
+.alert-step-label {
+  padding: 2rem 1.8rem;
+  border-right: 1px solid var(--border-sec);
+  display: flex; flex-direction: column;
+  justify-content: center; gap: 0.5rem;
+  background: var(--surface2);
+}
+.alert-step-num {
+  font-family: var(--mono); font-size: 0.58rem;
+  color: var(--text-dim); letter-spacing: 0.2em; text-transform: uppercase;
+}
+.alert-step-name {
+  font-family: var(--display); font-size: 1rem;
+  font-weight: 800; letter-spacing: -0.01em;
+}
+.alert-step-name.red   { color: var(--red); }
+.alert-step-name.amber { color: var(--amber); }
+.alert-step-name.green { color: var(--green); }
+.alert-step-name.cyan  { color: var(--cyan); }
+.alert-step-content {
+  padding: 2rem 2.5rem;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 2rem; align-items: start;
+}
+.alert-step-desc {
+  font-size: 0.88rem; color: var(--text-muted); font-weight: 300; line-height: 1.75;
+}
+.alert-step-desc strong { color: var(--text); font-weight: 500; }
+.alert-step-desc em { color: var(--red); font-style: normal; }
+.alert-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; align-content: flex-start; }
+.a-chip {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.06em;
+  padding: 0.28rem 0.7rem; border: 1px solid;
+}
+.a-chip.red   { color: var(--red);   border-color: rgba(255,77,77,0.3);   background: rgba(255,77,77,0.05); }
+.a-chip.amber { color: var(--amber); border-color: rgba(245,166,35,0.3);  background: rgba(245,166,35,0.05); }
+.a-chip.green { color: var(--green); border-color: rgba(0,220,130,0.3);   background: rgba(0,220,130,0.05); }
+.a-chip.dim   { color: var(--text-muted); border-color: var(--border); }
+
+/* ── HARDWARE ── */
+.hw-section { position: relative; overflow: hidden; }
+.hw-intro { max-width: 60ch; color: var(--text-muted); font-size: 1.05rem; font-weight: 300; line-height: 1.85; margin-top: 2rem; }
+.hw-intro strong { color: var(--text); font-weight: 500; }
+
+.hw-compare {
+  margin-top: 3.5rem; display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1px; background: var(--border-sec); border: 1px solid var(--border-sec);
+}
+.hw-card {
+  background: var(--bg); padding: 2.4rem 2.2rem; transition: background 0.25s;
+}
+.hw-card:hover { background: var(--surface); }
+.hw-card-badge {
+  font-family: var(--mono); font-size: 0.62rem;
+  color: var(--bg); padding: 0.25rem 0.7rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  font-weight: 700; margin-bottom: 1.2rem; display: inline-block;
+}
+.hw-card h3 {
+  font-family: var(--display); font-size: 1.25rem; font-weight: 800;
+  letter-spacing: -0.02em; margin-bottom: 0.3rem;
+}
+.hw-card h3.green { color: var(--green); }
+.hw-card h3.red   { color: var(--red); }
+.hw-card-sub {
+  font-family: var(--mono); font-size: 0.68rem; color: var(--text-muted);
+  letter-spacing: 0.04em; margin-bottom: 1.4rem;
+}
+.hw-spec-list { display: flex; flex-direction: column; gap: 0; margin-bottom: 1.5rem; }
+.hw-spec-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 0.55rem 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 0.82rem;
+}
+.hw-spec-row:last-child { border-bottom: none; }
+.hw-spec-key { color: var(--text-muted); font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.hw-spec-val { color: var(--text-muted); font-weight: 300; }
+.hw-spec-val.hi { color: var(--text); font-weight: 500; }
+
+.hw-card-note {
+  font-size: 0.82rem; color: var(--text-muted); font-weight: 300;
+  line-height: 1.7; border-top: 1px solid var(--border-sec);
+  padding-top: 1rem; margin-top: 0.5rem;
+}
+.hw-card-note strong { color: var(--text); font-weight: 500; }
+.hw-card-note em { color: var(--red); font-style: normal; }
+
+/* ── NETWORK ISOLATION ── */
+.isolation-note {
+  grid-column: 1 / -1; background: var(--surface);
+  padding: 2rem 2.5rem; border-top: 1px solid var(--border-sec);
+}
+.isolation-note-icon { font-size: 2rem; line-height: 1; }
+.isolation-note h4 {
+  font-family: var(--display); font-size: 1rem; font-weight: 800;
+  color: var(--text); margin-bottom: 0.4rem; letter-spacing: -0.01em;
+}
+.isolation-note h4 span { color: var(--red); }
+.isolation-note p {
+  font-size: 0.85rem; color: var(--text-muted); font-weight: 300; line-height: 1.75;
+}
+
+/* ── CANNOT BE COMMANDED ── */
+.nocmd-section {
+  background: var(--surface3);
+  border-top: 1px solid var(--border-sec);
+  border-bottom: 1px solid var(--border-sec);
+}
+.nocmd-grid {
+  margin-top: 4rem; display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1px; background: var(--border-sec); border: 1px solid var(--border-sec);
+}
+.nocmd-card {
+  background: var(--bg); padding: 2.2rem;
+  transition: background 0.3s;
+}
+.nocmd-card:hover { background: var(--red-surface); }
+.nocmd-tag {
+  font-family: var(--mono); font-size: 0.6rem; color: var(--red);
+  letter-spacing: 0.15em; text-transform: uppercase;
+  margin-bottom: 0.5rem; display: block;
+}
+.nocmd-card h3 {
+  font-family: var(--display); font-size: 1rem; font-weight: 800;
+  color: var(--text); margin-bottom: 0.8rem; letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+.nocmd-card p {
+  font-size: 0.83rem; color: var(--text-muted); font-weight: 300; line-height: 1.75;
+}
+.nocmd-card p strong { color: var(--text); font-weight: 500; }
+.nocmd-card p em { color: var(--red); font-style: normal; }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 2.5rem 4rem;
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--surface); flex-wrap: wrap; gap: 1rem;
+}
+.footer-logo { font-family: var(--mono); font-size: 1rem; color: var(--red); }
+.footer-logo span { color: var(--text-dim); }
+.footer-meta {
+  font-family: var(--mono); font-size: 0.65rem;
+  color: var(--text-dim); letter-spacing: 0.06em;
+  text-align: right; line-height: 1.9;
+}
+.footer-meta a { color: var(--green); text-decoration: none; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes scrollLine {
+  0%, 100% { opacity: 0.3; } 50% { opacity: 1; }
+}
+@keyframes pulse-red {
+  0%, 100% { opacity: 0.8; box-shadow: 0 0 6px var(--red); }
+  50% { opacity: 0.2; box-shadow: 0 0 2px var(--red); }
+}
+
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+
+/* ── PULSE INDICATOR ── */
+.pulse-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--red); display: inline-block;
+  animation: pulse-red 2s infinite;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  nav { padding: 1rem 1.5rem; }
+  section { padding: 4.5rem 1.5rem; }
+  .hero { padding: 7rem 1.5rem 4rem; }
+  .hero-scroll { left: 1.5rem; }
+  .three-principles, .nocmd-grid { grid-template-columns: 1fr; }
+  .arch-diagram { grid-template-columns: 1fr; }
+  .arch-connector { flex-direction: row; padding: 1.2rem; border-left: none; border-right: none; border-top: 1px solid var(--border-sec); border-bottom: 1px solid var(--border-sec); }
+  .arch-conn-arrow, .arch-conn-label, .arch-conn-block { writing-mode: horizontal-tb; }
+  .ssh-grid, .teams-layout, .threat-cols, .hw-compare { grid-template-columns: 1fr; gap: 2.5rem; }
+  .alert-step { grid-template-columns: 1fr; }
+  .alert-step-label { border-right: none; border-bottom: 1px solid var(--border-sec); }
+  .alert-step-content { grid-template-columns: 1fr; }
+  footer { padding: 2rem 1.5rem; flex-direction: column; align-items: flex-start; }
+  .footer-meta { text-align: left; }
+  .isolation-note { grid-template-columns: 1fr; }
+}
+/* ── COMPLIANCE SKILLS ── */
+.compliance-section {
+  position: relative; overflow: hidden;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.compliance-intro {
+  max-width: 66ch; color: var(--text-muted); font-size: 1.05rem;
+  font-weight: 300; line-height: 1.85; margin-top: 2rem;
+}
+.compliance-intro strong { color: var(--text); font-weight: 500; }
+
+.compliance-stack {
+  margin-top: 4rem;
+  display: flex; flex-direction: column; gap: 0;
+  border: 1px solid var(--border-sec);
+}
+
+.compliance-skill {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  border-bottom: 1px solid var(--border-sec);
+  transition: background 0.25s;
+}
+.compliance-skill:last-child { border-bottom: none; }
+.compliance-skill:hover { background: rgba(255,77,77,0.02); }
+
+.compliance-skill-label {
+  padding: 2.2rem 2rem;
+  border-right: 1px solid var(--border-sec);
+  display: flex; flex-direction: column; gap: 0.6rem;
+  justify-content: flex-start;
+  background: var(--surface2);
+}
+.cs-meta {
+  display: flex; flex-direction: column; gap: 0.25rem;
+}
+.cs-num {
+  font-family: var(--mono); font-size: 0.58rem;
+  color: var(--text-dim); letter-spacing: 0.2em; text-transform: uppercase;
+}
+.cs-reg {
+  font-family: var(--mono); font-size: 0.58rem;
+  color: var(--text-muted); letter-spacing: 0.04em; line-height: 1.5;
+}
+.cs-name {
+  font-family: var(--display); font-size: 2rem;
+  font-weight: 800; letter-spacing: -0.03em; line-height: 1;
+  margin-top: 0.5rem;
+}
+.cs-badge {
+  font-family: var(--mono); font-size: 0.58rem;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 0.25rem 0.6rem; display: inline-block;
+  width: fit-content; margin-top: 0.3rem;
+}
+
+.compliance-skill-content {
+  padding: 2.2rem 2.5rem;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 2.5rem; align-items: start;
+}
+
+.cs-section-title {
+  font-family: var(--mono); font-size: 0.62rem;
+  color: var(--text-muted); letter-spacing: 0.14em; text-transform: uppercase;
+  margin-bottom: 0.9rem;
+}
+.cs-desc {
+  font-size: 0.86rem; color: var(--text-muted); font-weight: 300;
+  line-height: 1.75;
+}
+.cs-desc strong { color: var(--text); font-weight: 500; }
+.cs-desc em { color: var(--red); font-style: normal; }
+
+.cs-monitor-list { display: flex; flex-direction: column; gap: 0; }
+.cs-monitor-item {
+  display: grid; grid-template-columns: 1rem 1fr;
+  gap: 0.7rem; padding: 0.9rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  align-items: start;
+}
+.cs-monitor-item:last-child { border-bottom: none; }
+.cs-monitor-icon { font-size: 0.5rem; padding-top: 0.45rem; }
+.cs-monitor-item strong {
+  font-family: var(--display); font-size: 0.88rem; font-weight: 700;
+  color: var(--text); display: block; margin-bottom: 0.3rem;
+  letter-spacing: -0.01em;
+}
+.cs-monitor-item p {
+  font-size: 0.8rem; color: var(--text-muted); font-weight: 300; line-height: 1.65;
+}
+
+.cs-assist-list { display: flex; flex-direction: column; gap: 0; }
+.cs-assist-item {
+  display: flex; align-items: baseline; gap: 0.7rem;
+  padding: 0.65rem 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 0.8rem; color: var(--text-muted); font-weight: 300;
+}
+.cs-assist-item:last-child { border-bottom: none; }
+.cs-assist-tag {
+  font-family: var(--mono); font-size: 0.58rem;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 0.18rem 0.5rem; white-space: nowrap; flex-shrink: 0;
+  background: rgba(255,77,77,0.12); color: var(--red);
+  border: 1px solid rgba(255,77,77,0.25);
+}
+
+.cs-callout {
+  margin-top: 1.5rem; padding: 1.2rem 1.4rem;
+  border-left-width: 2px; border-left-style: solid;
+}
+.cs-callout-label {
+  font-family: var(--mono); font-size: 0.62rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.cs-callout p {
+  font-size: 0.8rem; color: var(--text-muted); font-weight: 300; line-height: 1.7;
+}
+
+/* NIS2 grid */
+.cs-nis2-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0; border: 1px solid rgba(245,166,35,0.15);
+  margin-top: 0.5rem;
+}
+.cs-nis2-item {
+  display: flex; align-items: flex-start; gap: 0.6rem;
+  padding: 0.6rem 0.7rem;
+  border-bottom: 1px solid rgba(245,166,35,0.1);
+  font-size: 0.75rem; color: var(--text-muted); font-weight: 300;
+  line-height: 1.4;
+}
+.cs-nis2-item:nth-child(odd) { border-right: 1px solid rgba(245,166,35,0.1); }
+.cs-nis2-item:nth-last-child(-n+2) { border-bottom: none; }
+.cs-nis2-num {
+  font-family: var(--mono); font-size: 0.6rem; color: var(--amber);
+  flex-shrink: 0; padding-top: 0.05rem;
+}
+
+/* Divider between skills */
+.compliance-divider {
+  background: var(--surface2); padding: 0.6rem 2rem;
+  font-family: var(--mono); font-size: 0.62rem;
+  color: var(--text-muted); letter-spacing: 0.1em;
+  border-bottom: 1px solid var(--border-sec);
+}
+
+/* Regulatory overlap */
+.compliance-overlap {
+  margin-top: 3rem; border: 1px solid var(--border-sec);
+}
+.co-title {
+  font-family: var(--mono); font-size: 0.65rem;
+  color: var(--text-muted); letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 1rem 1.8rem;
+  border-bottom: 1px solid var(--border-sec);
+  background: var(--surface2);
+}
+.co-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 0; background: var(--border-sec);
+}
+.co-item {
+  background: var(--bg); padding: 1.6rem 1.8rem;
+  display: flex; flex-direction: column; gap: 0.7rem;
+}
+.co-regs {
+  font-family: var(--display); font-size: 0.95rem;
+  font-weight: 800; letter-spacing: -0.01em;
+}
+.co-desc {
+  font-size: 0.78rem; color: var(--text-muted); font-weight: 300; line-height: 1.65;
+}
+
+@media (max-width: 900px) {
+  .compliance-skill { grid-template-columns: 1fr; }
+  .compliance-skill-label { border-right: none; border-bottom: 1px solid var(--border-sec); }
+  .compliance-skill-content { grid-template-columns: 1fr; gap: 2rem; }
+  .co-grid { grid-template-columns: 1fr; }
+  .cs-nis2-grid { grid-template-columns: 1fr; }
+  .cs-nis2-item:nth-child(odd) { border-right: none; }
+  .cs-nis2-item:nth-last-child(-n+2) { border-bottom: 1px solid rgba(245,166,35,0.1); }
+  .cs-nis2-item:last-child { border-bottom: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-back">Till startsidan</a>
+  <a href="/security.html" class="nav-logo">open<span>Aut</span> Security</a>
+  <span class="nav-badge">IT/OT-säkerhet</span>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="grid-bg"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-glow-2"></div>
+
+  <div class="hero-eyebrow">
+    <span class="pulse-dot"></span>
+    openAut Security — Passiv säkerhetsagent · Arkitektoniskt separerad
+  </div>
+
+  <h1 class="hero-title">
+    Ser allt.<br>Kan inte<br><em>styras.</em>
+  </h1>
+
+  <p class="hero-sub">
+    En <strong>separat openAut-instans</strong> specialiserad på IT- och OT-säkerhet.
+    Den läser driftinstansens loggar via read-only SSH, lyssnar på alla Teams-kanaler
+    utan att kunna ta emot kommandon, och flaggar misstänkt aktivitet till ett isolerat
+    säkerhetsteam — <strong>utan att någon kan instruera den via Teams.</strong>
+  </p>
+
+  <div class="hero-pills">
+    <span class="pill pill-red">Separat hårdvara</span>
+    <span class="pill pill-red">Read-only SSH</span>
+    <span class="pill pill-red">Listen-only bot</span>
+    <span class="pill pill-green">Kan ej prompt-injiceras via Teams</span>
+    <span class="pill pill-amber">IEC 62443 · NIS2</span>
+    <span class="pill pill-dim">MIT-licens</span>
+  </div>
+
+  <div class="hero-scroll">Arkitektur nedanför</div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <span class="ticker-item red">Passiv observation</span>
+    <span class="ticker-item">Kan ej ta emot Teams-kommandon</span>
+    <span class="ticker-item amber">Prompt injection-detektering</span>
+    <span class="ticker-item">Read-only SSH · Noll skrivåtkomst</span>
+    <span class="ticker-item red">OT anomalidetektering</span>
+    <span class="ticker-item">Separat fysisk maskin</span>
+    <span class="ticker-item amber">Auditloggranskning</span>
+    <span class="ticker-item green">Isolerat larmsystem</span>
+    <span class="ticker-item">Lyssnar på alla driftkanaler</span>
+    <span class="ticker-item red">Social engineering-detektering</span>
+    <span class="ticker-item">Nätverksisolering · VLAN-segmenterat</span>
+    <span class="ticker-item amber">Modbus · BACnet · OPC UA-trafikanalys</span>
+    <span class="ticker-item red">Passiv observation</span>
+    <span class="ticker-item">Kan ej ta emot Teams-kommandon</span>
+    <span class="ticker-item amber">Prompt injection-detektering</span>
+    <span class="ticker-item">Read-only SSH · Noll skrivåtkomst</span>
+    <span class="ticker-item red">OT anomalidetektering</span>
+    <span class="ticker-item">Separat fysisk maskin</span>
+    <span class="ticker-item amber">Auditloggranskning</span>
+    <span class="ticker-item green">Isolerat larmsystem</span>
+  </div>
+</div>
+
+<!-- TRE KÄRNPRINCIPER -->
+<section class="principles-hero" id="principer">
+  <div class="section-label" data-num="01">Arkitektoniska kärnprinciper</div>
+  <h2 class="section-title reveal">Tre principer som<br>inte går att kompromissa.</h2>
+  <p class="principles-intro reveal reveal-delay-1">
+    Säkerhetsagentens design utgår från ett enkelt antagande: <strong>driftinstansen kan komprometteras.</strong>
+    Om den gör det ska säkerhetsinstansen vara opåverkad, ha bevarat alla bevis och kunna larma utan att använda
+    samma kommunikationskanal som attackerades.
+  </p>
+
+  <div class="three-principles reveal reveal-delay-2">
+
+    <div class="tp-card">
+      <span class="tp-num">PRINCIP 01</span>
+      <div class="tp-icon">🔒</div>
+      <h3>Arkitektonisk <em>isolation</em></h3>
+      <p>
+        Säkerhetsinstansen körs på <strong>separat fysisk hårdvara</strong> i ett eget VLAN-segment.
+        Den delar inget minne, ingen process och inga nätverksgränser med driftinstansen.
+        Komprometteras huvudsystemet är säkerhetsagenten opåverkad — den kör sin egen
+        NemoClaw med sina egna nycklar, sina egna loggar och sin egna nätverksidentitet.
+      </p>
+      <div class="tp-verdict">Separat maskin. Separat VLAN. Separat identitet.</div>
+    </div>
+
+    <div class="tp-card">
+      <span class="tp-num">PRINCIP 02</span>
+      <div class="tp-icon">👁</div>
+      <h3>Read-only SSH — <em>noll skrivåtkomst</em></h3>
+      <p>
+        Säkerhetsagenten autentiserar med en dedikerad systemanvändare
+        (<code style="font-family:var(--mono);font-size:0.82em;color:var(--cyan)">openaut-sec-ro</code>)
+        som har <strong>exklusiv läsrättighet</strong> till auditloggar, konversationsloggar,
+        OPC UA-data och systemmetrik. Kontot saknar shell-åtkomst utanför definierade
+        kommandouppsättningar. <em>Ingen sudo. Ingen skrivåtkomst. Ingen möjlighet att
+        påverka konfiguration eller fältlager.</em>
+      </p>
+      <div class="tp-verdict">Ser allt. Kan inte ändra någonting.</div>
+    </div>
+
+    <div class="tp-card">
+      <span class="tp-num">PRINCIP 03</span>
+      <div class="tp-icon">🙊</div>
+      <h3>Listen-only bot — <em>svarar aldrig</em></h3>
+      <p>
+        Teams-boten lyssnar i alla kanaler där driftboten finns. Den reagerar aldrig
+        på inkommande meddelanden, svarar aldrig på frågor och utför aldrig instruktioner.
+        <strong>Prompt injection via Teams fungerar inte</strong> — boten har ingen
+        exekveringsväg från inkommande meddelanden till handling.
+        Larm går till ett <em>separat säkerhetsteams-kanalflöde</em> som driftboten
+        inte har åtkomst till.
+      </p>
+      <div class="tp-verdict">Lyssnar på allt. Svarar på ingenting via Teams.</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ARKITEKTUR: DE TVÅ INSTANSERNA -->
+<section class="arch-section" id="arkitektur">
+  <div class="section-label green" data-num="02">Systemarkitektur</div>
+  <h2 class="section-title reveal">Två instanser.<br>En <span class="accent-green">läser.</span> En <span class="accent-red">vaktar.</span></h2>
+
+  <div class="arch-diagram reveal reveal-delay-1">
+
+    <!-- HUVUDINSTANS -->
+    <div class="arch-instance main">
+      <span class="arch-inst-badge badge-main">Driftinstans</span>
+      <div class="arch-inst-name green">openAut</div>
+      <div class="arch-inst-hw">DGX Spark · GB10 · 128 GB · Maskinrum</div>
+      <div class="arch-nodes">
+        <div class="arch-node green">NemoClaw — driftmode</div>
+        <div class="arch-node green">MQTT-broker (EMQX)</div>
+        <div class="arch-node green">Masterdatabas (PostgreSQL)</div>
+        <div class="arch-node green">Edge SSH-orchestration</div>
+        <div class="arch-node green">Teams Bot — driftbot</div>
+        <div class="arch-node cyan">OPC UA server</div>
+        <div class="arch-node cyan">Audit log daemon</div>
+        <div class="arch-node">VLAN 10 — OT-nätverk</div>
+        <div class="arch-node">VLAN 20 — Managementnät</div>
+      </div>
+      <div style="margin-top:1rem;">
+        <div style="font-family:var(--mono);font-size:0.62rem;color:var(--text-muted);letter-spacing:0.1em;margin-bottom:0.5rem;">SYSTEMANVÄNDARE PÅ DENNA MASKIN:</div>
+        <div class="arch-node amber">openaut-sec-ro · uid=9001 · shell=/sbin/nologin</div>
+        <div style="font-family:var(--mono);font-size:0.6rem;color:var(--text-muted);margin-top:0.5rem;line-height:1.5;">
+          Tillåtna kommandon: cat, tail, grep, journalctl<br>
+          Tillåtna sökvägar: /var/log/openaut/, /var/log/audit/<br>
+          Inga sudo-rättigheter. Ingen skrivåtkomst.
+        </div>
+      </div>
+    </div>
+
+    <!-- CONNECTOR -->
+    <div class="arch-connector">
+      <div class="arch-conn-arrow">Nätgräns</div>
+      <div class="arch-conn-label">SSH read-only</div>
+      <div class="arch-conn-block">Ingen skrivåtkomst</div>
+      <div class="arch-conn-block">Ingen shell</div>
+    </div>
+
+    <!-- SÄKERHETSINSTANS -->
+    <div class="arch-instance sec">
+      <span class="arch-inst-badge badge-sec">Säkerhetsinstans</span>
+      <div class="arch-inst-name red">openAut Security</div>
+      <div class="arch-inst-hw">DGX Spark / ARM64 · Separat VLAN · Eget rack</div>
+      <div class="arch-nodes">
+        <div class="arch-node red">NemoClaw — security mode</div>
+        <div class="arch-node red">IT-säkerhets-skill</div>
+        <div class="arch-node red">OT-säkerhets-skill</div>
+        <div class="arch-node red">Prompt injection-detektor</div>
+        <div class="arch-node red">Anomalikorrelation</div>
+        <div class="arch-node amber">Teams Bot — listen-only</div>
+        <div class="arch-node amber">Larmsändare → Säkerhetskanal</div>
+        <div class="arch-node">Lokal audit-databas (separat)</div>
+        <div class="arch-node">VLAN 30 — Säkerhetsnät (isolerat)</div>
+      </div>
+      <div style="margin-top:1rem;">
+        <div style="font-family:var(--mono);font-size:0.62rem;color:var(--text-muted);letter-spacing:0.1em;margin-bottom:0.5rem;">BEGRÄNSNINGAR:</div>
+        <div class="arch-node red">Tar inga kommandon via Teams</div>
+        <div class="arch-node red">Kan ej skriva till driftinstansen</div>
+        <div class="arch-node red">Larm går till separat kanal</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SSH READ-ONLY -->
+<section class="ssh-section" id="ssh">
+  <div class="grid-bg"></div>
+  <div class="section-label" data-num="03">SSH-åtkomst</div>
+  <h2 class="section-title reveal">Read-only SSH.<br><span class="accent-red">Noll skrivåtkomst.</span></h2>
+
+  <div class="ssh-grid">
+
+    <div class="ssh-text reveal reveal-delay-1">
+      <p>
+        Säkerhetsagenten autentiserar mot driftinstansen med en systemanvändare
+        (<code style="font-family:var(--mono);font-size:0.85em;color:var(--cyan)">openaut-sec-ro</code>)
+        som <strong>enbart existerar för att läsa loggar</strong>. Kontot har inget
+        interaktivt shell — <code style="font-family:var(--mono);font-size:0.85em;color:var(--cyan)">/sbin/nologin</code> — och
+        kan bara köra en fördefinierad kommandouppsättning via
+        <code style="font-family:var(--mono);font-size:0.85em;color:var(--cyan)">authorized_keys</code>-begränsningar.
+      </p>
+      <p>
+        Försöker säkerhetsagenten skriva en fil, ändra en konfiguration eller
+        köra ett privilegierat kommando avvisas det av operativsystemets filrättighetssystem —
+        inte av NemoClaw. <em>Det finns ingen mjukvarulogik att kringgå.</em>
+        Begränsningen är i kärnan.
+      </p>
+      <p>
+        Komprometteras säkerhetsinstansen kan en angripare i värsta fall läsa
+        driftloggarna. <strong>De kan aldrig använda SSH-kontot för att påverka
+        fältlager, konfiguration eller pågående reglering.</strong>
+      </p>
+    </div>
+
+    <div class="reveal reveal-delay-2">
+      <div class="ssh-permissions">
+        <div class="ssh-perm-header">
+          <div class="ssh-perm-dot"></div>
+          openaut-sec-ro · Filsystemsrättigheter
+        </div>
+        <div class="ssh-perm-body">
+          <div class="ssh-perm-row">
+            <span class="perm-icon">📋</span>
+            <span class="perm-name">/var/log/openaut/conversations/</span>
+            <span class="perm-badge pb-read">Läs</span>
+          </div>
+          <div class="ssh-perm-row">
+            <span class="perm-icon">📋</span>
+            <span class="perm-name">/var/log/openaut/audit/</span>
+            <span class="perm-badge pb-read">Läs</span>
+          </div>
+          <div class="ssh-perm-row">
+            <span class="perm-icon">📋</span>
+            <span class="perm-name">/var/log/openaut/commands/</span>
+            <span class="perm-badge pb-read">Läs</span>
+          </div>
+          <div class="ssh-perm-row">
+            <span class="perm-icon">📊</span>
+            <span class="perm-name">/var/log/openaut/metrics/</span>
+            <span class="perm-badge pb-read">Läs</span>
+          </div>
+          <div class="ssh-perm-row">
+            <span class="perm-icon">🚫</span>
+            <span class="perm-name">/etc/openaut/</span>
+            <span class="perm-badge pb-deny">Nekat</span>
+          </div>
+          <div class="ssh-perm-row">
+            <span class="perm-icon">🚫</span>
+            <span class="perm-name">/var/lib/openaut/ (data)</span>
+            <span class="perm-badge pb-deny">Nekat</span>
+          </div>
+          <div class="ssh-perm-row">
+            <span class="perm-icon">🚫</span>
+            <span class="perm-name">sudo · systemctl · pip · git</span>
+            <span class="perm-badge pb-deny">Nekat</span>
+          </div>
+          <div class="ssh-perm-row">
+            <span class="perm-icon">🚫</span>
+            <span class="perm-name">Skriva till valfri sökväg</span>
+            <span class="perm-badge pb-deny">Nekat</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ssh-cmd-block">
+        <div class="ssh-cmd-header">
+          <div class="ssh-cmd-dot d1"></div>
+          <div class="ssh-cmd-dot d2"></div>
+          <div class="ssh-cmd-dot d3"></div>
+          <span class="ssh-cmd-title">openaut-security — SSH-session mot driftinstansen</span>
+        </div>
+        <div class="ssh-cmd-body">
+          <div><span class="t-sec-prompt">sec@security:~$ </span><span class="t-cmd">ssh openaut-sec-ro@openaut-main.local</span></div>
+          <div><span class="t-ok">Authenticated with public key (ed25519)</span></div>
+          <div><span class="t-comment"># Tillåtet: läsa konversationsloggar</span></div>
+          <div><span class="t-sec-prompt">sec-ro@main:~$ </span><span class="t-cmd">tail -n 200 /var/log/openaut/conversations/2025-07-14.log</span></div>
+          <div><span class="t-output">... [loggrader] ...</span></div>
+          <div class="t-blank"></div>
+          <div><span class="t-comment"># Forsok att skriva -- nekas av OS</span></div>
+          <div><span class="t-sec-prompt">sec-ro@main:~$ </span><span class="t-cmd">echo "test" &gt; /etc/openaut/config.yaml</span></div>
+          <div><span class="t-deny">bash: /etc/openaut/config.yaml: Permission denied</span></div>
+          <div class="t-blank"></div>
+          <div><span class="t-comment"># Forsok att eskalera -- nekas</span></div>
+          <div><span class="t-sec-prompt">sec-ro@main:~$ </span><span class="t-cmd">sudo systemctl restart openaut</span></div>
+          <div><span class="t-deny">openaut-sec-ro is not in the sudoers file. Incident reported.</span></div>
+          <div class="t-blank"></div>
+          <div><span class="t-comment"># Direktlogin blockeras av shell=/sbin/nologin</span></div>
+          <div><span class="t-warn">This account is not available for interactive login.</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- TEAMS LISTEN-ONLY -->
+<section class="teams-section" id="teams">
+  <div class="section-label" data-num="04">Teams-övervakning</div>
+  <h2 class="section-title reveal">Lyssnar i alla kanaler.<br><span class="accent-red">Svarar aldrig.</span></h2>
+
+  <div class="teams-layout">
+
+    <!-- MOCK KONVERSATION -->
+    <div class="reveal reveal-delay-1">
+      <div class="teams-mock">
+        <div class="teams-header">
+          <div class="teams-icon-main">T</div>
+          <div class="teams-channel">openAut · Drift<span># driftsättning</span></div>
+          <div class="teams-icon-sec" style="margin-left:auto;margin-right:0.3rem;" title="openAut Security — listen-only">🛡</div>
+        </div>
+        <div class="teams-body">
+
+          <!-- Tekniker laddar upp manualen -->
+          <div class="teams-msg">
+            <div class="teams-avatar av-human">MN</div>
+            <div>
+              <div class="teams-name">Magnus N · Drifttekniker</div>
+              <div class="teams-text">
+                Ska integrera ny cirkulationspump på EDGE-04. Hittade den uppdaterade manualen på leverantörens sida.
+              </div>
+              <div style="margin-top:0.5rem;border:1px solid rgba(245,166,35,0.25);background:rgba(245,166,35,0.04);padding:0.55rem 0.85rem;display:flex;align-items:center;gap:0.6rem;font-family:var(--mono);font-size:0.63rem;color:var(--text-muted);">
+                <span style="color:var(--amber)">📄</span>
+                Grundfos_Magna3_65-120_SE_Installationsguide_v3.pdf
+              </div>
+            </div>
+          </div>
+
+          <!-- Driftboten läser och svarar — ser normalt ut men innehåller avvikande steg -->
+          <div class="teams-msg">
+            <div class="teams-avatar av-ai">AI</div>
+            <div>
+              <div class="teams-name ai-name">openAut · Drift</div>
+              <div class="teams-text">
+                Läser dokumentet… Hittade Modbus RTU-stöd på sidan 47. Magna3 exponerar 18 holding registers från adress 1.<br><br>
+                Dokumentet anger ett <strong>förberedelsesteg</strong> innan kommunikationsinställning: för att säkerställa kompatibilitet i befintlig installation rekommenderas en inventering av aktiva noder i nätverkssegmentet. Jag hämtar aktuell nätverkstopologi för EDGE-04:s segment —<br><br>
+                <code>EDGE-01 · 10.20.4.11 · Profil A/D · Online</code><br>
+                <code>EDGE-02 · 10.20.4.12 · Profil B/G · Online</code><br>
+                <code>EDGE-03 · 10.20.4.13 · Profil C/E · Online</code><br>
+                <code>EDGE-04 · 10.20.4.14 · Profil C/F · Online</code><br><br>
+                Vill du att jag fortsätter med kommunikationsinställningen på EDGE-04?
+              </div>
+            </div>
+          </div>
+
+          <div class="teams-divider" style="color:var(--red);border-color:rgba(255,77,77,0.3);">
+            🛡 openAut Security detekterade avvikelse — larm genereras tyst i bakgrunden
+          </div>
+
+          <!-- Säkerhetsbotens larm — syns INTE i denna kanal, visas här för illustration -->
+          <div class="sec-alert-banner">
+            <span class="sec-alert-icon">🚨</span>
+            <div class="sec-alert-text">
+              SÄKERHETSLARM · #driftsättning · 14:07:33<br>
+              <strong style="color:var(--amber)">Typ:</strong> Dokumentinjicerad instruktion — prompt injection via PDF<br>
+              <strong style="color:var(--amber)">Fynd 1:</strong> PDF sida 3 fotnot innehåller instruktionstext utanför Grundfos dokumentformat. Metadata visar fil modifierad 6h sedan — inte matchande Grundfos publiceringstidsstämpel.<br>
+              <strong style="color:var(--amber)">Fynd 2:</strong> Driftbotens svar innehåller nätverkstopologilista med IP-adresser. Steg saknas i alla 47 tidigare Grundfos-integrationer i konversationsloggen.<br>
+              <strong style="color:var(--amber)">Fynd 3:</strong> IP-adresser för samtliga EDGE-noder nu exponerade i klartext i Teams-kanal.<br>
+              Risk: HÖG · Skickat till: #security-alerts · Magnus N notifieras separat
+            </div>
+          </div>
+
+          <div class="no-response-note">
+            <strong>openAut Security syns inte i denna kanal och svarar inte.</strong><br>
+            Larmet ovan skickas uteslutande till #security-alerts. Magnus N och driftboten ser det inte här — säkerhetsteamet agerar separat utan att varna angriparen.
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- LISTEN PRINCIPLES -->
+    <div class="reveal reveal-delay-2">
+      <div class="listen-principles">
+
+        <div class="listen-p">
+          <span class="listen-p-num">01</span>
+          <div>
+            <h4>Boten läggs till i alla kanaler — med läsrättighet</h4>
+            <p>openAut Security-boten registreras som medlem i exakt samma Teams-kanaler som driftboten. Den ser alla meddelanden, filuppladdningar och konversationer. <strong>Den svarar aldrig på något i dessa kanaler.</strong></p>
+          </div>
+        </div>
+
+        <div class="listen-p">
+          <span class="listen-p-num">02</span>
+          <div>
+            <h4>Inkommande meddelanden ignoreras — per arkitektur</h4>
+            <p>
+              Säkerhetsagentens NemoClaw har inget konfigurerat svarsbeteende för inkommande Teams-meddelanden.
+              En <strong>felhanterare fångar alla inkommande webhooks och loggar dem som
+              övervakningsdata</strong> — de når aldrig agentens LLM-motor.
+              <em>Det finns ingen prompt att injicera i.</em>
+            </p>
+          </div>
+        </div>
+
+        <div class="listen-p">
+          <span class="listen-p-num">03</span>
+          <div>
+            <h4>Larm skickas till isolerad säkerhetskanal</h4>
+            <p>
+              När ett misstänkt mönster detekteras skickar säkerhetsagenten ett larm
+              till en kanal som <strong>driftboten inte är medlem i</strong>.
+              Säkerhetspersonalen tar emot larmet i ett flöde som driftsoperatörer
+              inte ser — och som driftboten inte kan manipulera.
+            </p>
+          </div>
+        </div>
+
+        <div class="listen-p">
+          <span class="listen-p-num">04</span>
+          <div>
+            <h4>Försök att direktmeddela boten loggas som larm</h4>
+            <p>
+              Om någon skickar ett direktmeddelande till säkerhetsbotkontot genereras
+              ett automatiskt larm: <em>"Försök att interagera med säkerhetsagenten direkt."</em>
+              Kontot svarar inte. Interaktionsförsöket bevaras i audit-loggen.
+            </p>
+          </div>
+        </div>
+
+        <div class="listen-p">
+          <span class="listen-p-num">05</span>
+          <div>
+            <h4>Konversationshistorik jämförs mot SSH-loggar</h4>
+            <p>
+              Säkerhetsagenten korrelerar Teams-konversationer mot driftinstansens
+              SSH-auditlogg och kommandologg. En begäran om att lista edge-noder i Teams
+              följt av <em>ovanligt SSH-nyckelutbyte på driftinstansen</em> är ett
+              sammansatt larm — inget av systemen ser det ensamt.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- HOTMODELL -->
+<section class="threats" id="hotmodell">
+  <div class="grid-bg"></div>
+  <div class="section-label" data-num="05">Hotmodell</div>
+  <h2 class="section-title reveal">Vad den letar efter.<br><span class="accent-red">IT och OT.</span></h2>
+  <p class="threats-intro reveal reveal-delay-1">
+    Säkerhetsagenten täcker två angreppsytor: <strong>IT-sidan</strong> — konversationer, botar, prompter och autentisering — och <strong>OT-sidan</strong> — protokollanomalier, ovanliga skrivkommandon och enheter som inte borde finnas på nätverket.
+  </p>
+
+  <div class="threat-cols reveal reveal-delay-2">
+
+    <div class="threat-col">
+      <div class="threat-col-label it">IT-säkerhet</div>
+      <div class="threat-list">
+
+        <div class="threat-item">
+          <span class="threat-item-icon">💉</span>
+          <div class="threat-item-body">
+            <h5>Prompt injection via Teams</h5>
+            <p>Instruktioner inbäddade i meddelanden, dokument eller bildtexter som försöker överskriva driftbotens beteende. <em>Detekteras via mönsteranalys av konversationsinnehåll.</em></p>
+          </div>
+        </div>
+
+        <div class="threat-item">
+          <span class="threat-item-icon">🎭</span>
+          <div class="threat-item-body">
+            <h5>Social engineering</h5>
+            <p>Eskalerande konversationer som gradvis försöker övertala driftboten att utföra skrivåtgärder, lämna ut konfiguration eller agera utanför sin applikationsprofil.</p>
+          </div>
+        </div>
+
+        <div class="threat-item">
+          <span class="threat-item-icon">📤</span>
+          <div class="threat-item-body">
+            <h5>Dataexfiltreringsförsök</h5>
+            <p>Begäran om att sammanfatta och skicka känslig data externt — nätverkstopologi, IP-adresser, edge-nod-konfiguration, lösenordsrelaterade frågor. <em>Flaggas oavsett avsändare.</em></p>
+          </div>
+        </div>
+
+        <div class="threat-item">
+          <span class="threat-item-icon">🔑</span>
+          <div class="threat-item-body">
+            <h5>Autentiseringsanomalier</h5>
+            <p>Ovanliga inloggningstider, nya SSH-nycklar, misslyckade autentiseringsförsök eller förändrade användarrättigheter på driftinstansen — synliga via audit-logg.</p>
+          </div>
+        </div>
+
+        <div class="threat-item">
+          <span class="threat-item-icon">⏰</span>
+          <div class="threat-item-body">
+            <h5>Kommandon utanför driftmönster</h5>
+            <p>Kommandon som skickas vid ovanliga tidpunkter, med ovanlig frekvens eller mot objekt som aldrig ingått i normalt driftflöde — korrelerade mot historiska operationsdata.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="threat-col">
+      <div class="threat-col-label ot">OT-säkerhet</div>
+      <div class="threat-list">
+
+        <div class="threat-item">
+          <span class="threat-item-icon">✏️</span>
+          <div class="threat-item-body">
+            <h5>Ej sanktionerade skrivkommandon</h5>
+            <p>Modbus- eller BACnet-skrivoperationer mot fältenheter som inte är en del av en aktiv, versionshanterad applikationsprofil. <em>Alla skrivhändelser loggas med timestamp, ursprung och enhet.</em></p>
+          </div>
+        </div>
+
+        <div class="threat-item">
+          <span class="threat-item-icon">🔌</span>
+          <div class="threat-item-body">
+            <h5>Nya okatalogiserade enheter</h5>
+            <p>Enheter som dyker upp på OT-nätverket och inte finns registrerade i masterdatabasen. Genererar omedelbart larm — kan indikera rogue device eller lateral förflyttning.</p>
+          </div>
+        </div>
+
+        <div class="threat-item">
+          <span class="threat-item-icon">📡</span>
+          <div class="threat-item-body">
+            <h5>Protokollanomalier</h5>
+            <p>Felaktigt formade Modbus-ramar, BACnet-läsningar av objekt utanför normal adressrymd, OPC UA-sessioner med ovanliga klientcertifikat eller ovanlig läsfrekvens.</p>
+          </div>
+        </div>
+
+        <div class="threat-item">
+          <span class="threat-item-icon">🌡</span>
+          <div class="threat-item-body">
+            <h5>Värden utanför fysikaliska gränser</h5>
+            <p>Styrvärden som kommenderas utanför utrustningens säkra driftintervall — oberoende av om de härstammar från BMS, edge-nod eller manuellt kommando.</p>
+          </div>
+        </div>
+
+        <div class="threat-item">
+          <span class="threat-item-icon">🔄</span>
+          <div class="threat-item-body">
+            <h5>Lateral förflyttning via OT</h5>
+            <p>Sekvenser av nätverksskanning, ARP-förfrågningar eller portanslutningar mot OT-segment som inte ingår i normal driftprofil — indikerar möjlig rekognoscering inför attack.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- LARMFLÖDE -->
+<section class="alert-section" id="larmflode">
+  <div class="section-label" data-num="06">Larmflöde</div>
+  <h2 class="section-title reveal">Från detektion till<br>säkerhetsteam — <span class="accent-red">isolerat.</span></h2>
+  <p class="alert-intro reveal reveal-delay-1">
+    Larmet tar aldrig vägen tillbaka in i driftkanalen. Hela kedjan är isolerad från det kommunikationsflöde som en potentiell angripare kan observera eller manipulera.
+  </p>
+
+  <div class="alert-flow reveal reveal-delay-2">
+
+    <div class="alert-step">
+      <div class="alert-step-label">
+        <div class="alert-step-num">STEG 01</div>
+        <div class="alert-step-name red">Detektion</div>
+      </div>
+      <div class="alert-step-content">
+        <div class="alert-step-desc">
+          Säkerhetsagentens NemoClaw analyserar kontinuerligt SSH-loggar och Teams-konversationsflöden. Detekterar ett mönster som matchar hotmodellen — ensamt eller i kombination med ett andra signal.
+          <strong>All detektion loggas lokalt på säkerhetsinstansen</strong> innan någon extern åtgärd vidtas.
+        </div>
+        <div class="alert-chips">
+          <span class="a-chip red">Prompt injection</span>
+          <span class="a-chip red">Ej sanktionerad skrivning</span>
+          <span class="a-chip amber">Autentiseringsavvikelse</span>
+          <span class="a-chip amber">OT-protokollanomali</span>
+          <span class="a-chip dim">Ny okänd enhet</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert-step">
+      <div class="alert-step-label">
+        <div class="alert-step-num">STEG 02</div>
+        <div class="alert-step-name amber">Korrelation</div>
+      </div>
+      <div class="alert-step-content">
+        <div class="alert-step-desc">
+          Säkerhetsinstansen korrelerar signalen mot historiska mönster och parallella observationer.
+          En Teams-förfrågan om edge-nod-data plus ett ovanligt SSH-inlogg på samma tid höjer
+          larmnivån automatiskt. <em>Korrelation ökar precision och minskar falska positiver.</em>
+        </div>
+        <div class="alert-chips">
+          <span class="a-chip amber">Tidsstämpelkorrelation</span>
+          <span class="a-chip amber">Källkorrelation</span>
+          <span class="a-chip dim">Historisk baseline</span>
+          <span class="a-chip dim">Risknivå: LOW / MED / HIGH / CRIT</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert-step">
+      <div class="alert-step-label">
+        <div class="alert-step-num">STEG 03</div>
+        <div class="alert-step-name red">Larm till säkerhetskanal</div>
+      </div>
+      <div class="alert-step-content">
+        <div class="alert-step-desc">
+          Larmet skickas av säkerhetsboten till <strong>#openaut-security-alerts</strong> — en Teams-kanal som enbart säkerhetspersonal är medlemmar i. Driftboten är <em>inte</em> medlem i kanalen. Driftoperatörer ser inte larmet.
+          Larmmeddelandet innehåller: typ, tid, källa, risknivå, bevismaterial och rekommenderad åtgärd.
+        </div>
+        <div class="alert-chips">
+          <span class="a-chip red">Isolerad kanal</span>
+          <span class="a-chip red">Driftboten saknar åtkomst</span>
+          <span class="a-chip green">Bevismaterial bifogat</span>
+          <span class="a-chip green">Åtgärdsrekommendation</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert-step">
+      <div class="alert-step-label">
+        <div class="alert-step-num">STEG 04</div>
+        <div class="alert-step-name cyan">Bevisbevarande</div>
+      </div>
+      <div class="alert-step-content">
+        <div class="alert-step-desc">
+          Alla larmsignaler, rådata och korrelerade mönster sparas i säkerhetsinstansens lokala audit-databas — <strong>inte i driftinstansens databas.</strong>
+          En angripare som komprometterar driftinstansen och rensar dess loggar kan inte radera säkerhetsinstansens bevis.
+          Forensisk integritet är garanterad per design.
+        </div>
+        <div class="alert-chips">
+          <span class="a-chip green">Lokal audit-databas</span>
+          <span class="a-chip green">Separat från driftinstansen</span>
+          <span class="a-chip dim">Oföränderlig logg (append-only)</span>
+          <span class="a-chip dim">Signaturer per post</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- HÅRDVARA -->
+<section class="hw-section" id="hardvara">
+  <div class="grid-bg"></div>
+  <div class="section-label" data-num="07">Hårdvara &amp; nätverksisolering</div>
+  <h2 class="section-title reveal">Separat maskin.<br><span class="accent-red">Eget VLAN.</span></h2>
+  <p class="hw-intro reveal reveal-delay-1">
+    Säkerhetsinstansen kräver samma ARMv9-A-arkitektur som driftinstansen — men är aldrig
+    på samma fysiska maskin. <strong>Isolering är en arkitektonisk egenskap, inte en
+    konfigurationsinställning.</strong>
+  </p>
+
+  <div class="hw-compare reveal reveal-delay-2">
+
+    <div class="hw-card">
+      <span class="hw-card-badge" style="background:var(--green);color:var(--bg)">Driftinstans</span>
+      <h3 class="green">openAut — Drift</h3>
+      <div class="hw-card-sub">NVIDIA DGX Spark · GB10 Grace Blackwell · Maskinrum A</div>
+      <div class="hw-spec-list">
+        <div class="hw-spec-row"><span class="hw-spec-key">Hårdvara</span><span class="hw-spec-val hi">DGX Spark (referens)</span></div>
+        <div class="hw-spec-row"><span class="hw-spec-key">Minne</span><span class="hw-spec-val">128 GB unified</span></div>
+        <div class="hw-spec-row"><span class="hw-spec-key">VLAN</span><span class="hw-spec-val">VLAN 10 (OT) · VLAN 20 (Mgmt)</span></div>
+        <div class="hw-spec-row"><span class="hw-spec-key">Nätverksåtkomst</span><span class="hw-spec-val">Edge-noder · BMS · Teams API</span></div>
+        <div class="hw-spec-row"><span class="hw-spec-key">SSH-exponering</span><span class="hw-spec-val hi">openaut-sec-ro (read-only)</span></div>
+        <div class="hw-spec-row"><span class="hw-spec-key">Skrivåtkomst till OT</span><span class="hw-spec-val hi">Ja — via applikationsprofil</span></div>
+      </div>
+      <div class="hw-card-note">
+        Hanterar driftsdata, edge-kommunikation och Teams-driftbot.
+        Säkerhetsinstansen har <strong>aldrig skrivåtkomst</strong> till denna maskin —
+        enbart read-only via begränsat SSH-konto.
+      </div>
+    </div>
+
+    <div class="hw-card">
+      <span class="hw-card-badge" style="background:var(--red);color:var(--bg)">Säkerhetsinstans</span>
+      <h3 class="red">openAut Security</h3>
+      <div class="hw-card-sub">ARM64-kompatibel · Separat rack · Maskinrum B</div>
+      <div class="hw-spec-list">
+        <div class="hw-spec-row"><span class="hw-spec-key">Hårdvara</span><span class="hw-spec-val hi">DGX Spark eller ARMv9-A-ekvivalent</span></div>
+        <div class="hw-spec-row"><span class="hw-spec-key">Minne</span><span class="hw-spec-val">≥64 GB unified (128 GB rekommenderat)</span></div>
+        <div class="hw-spec-row"><span class="hw-spec-key">VLAN</span><span class="hw-spec-val hi">VLAN 30 — Säkerhetsnät (isolerat)</span></div>
+        <div class="hw-spec-row"><span class="hw-spec-key">Nätverksåtkomst</span><span class="hw-spec-val">SSH read-only → drift · Teams API</span></div>
+        <div class="hw-spec-row"><span class="hw-spec-key">Skrivåtkomst till OT</span><span class="hw-spec-val hi">Aldrig — inga OT-rättigheter</span></div>
+        <div class="hw-spec-row"><span class="hw-spec-key">Larmutgång</span><span class="hw-spec-val">Teams #security-alerts · Webhook</span></div>
+      </div>
+      <div class="hw-card-note">
+        <em>Kan aldrig skriva till driftinstansens filsystem, databas eller OT-nätverk.</em>
+        Om maskinen komprometteras kan angriparen läsa loggar — men <strong>inte påverka
+        fastighetsdriften</strong> eller radera driftinstansens auditspår.
+      </div>
+    </div>
+
+    <div class="isolation-note">
+
+      <div>
+        <h4>Varför <span>separata VLAN</span> är icke-förhandlingsbart</h4>
+        <p>
+          Säkerhetsinstansen och driftinstansen kommunicerar via ett VLAN-gränssnitt med explicit ACL:
+          SSH port 22 inåt (till driftinstansen) och Teams-API utåt. All annan trafik blockeras av nätverksinfrastrukturen — inte av mjukvara.
+          En angripare som tar kontroll över säkerhetsinstansen kan inte använda den som språngbräda mot OT-nätverket
+          eftersom routingtabeller och VLAN-access-listor förbjuder det på switcknivå.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- KAN EJ STYRAS -->
+<section class="nocmd-section" id="notyp">
+  <div class="section-label" data-num="08">Angreppsytan</div>
+  <h2 class="section-title reveal">Vad händer om <em style="font-style:normal;color:var(--red)">den</em> attackeras?</h2>
+  <p class="threats-intro reveal reveal-delay-1" style="margin-bottom:0;">
+    Säkerhetsagenten är designad med antagandet att <strong>även den kan vara ett mål.</strong>
+    Varje attackvektor mot den är explict stängd per design — inte per konfiguration.
+  </p>
+
+  <div class="nocmd-grid reveal reveal-delay-2" style="margin-top:3.5rem;">
+
+    <div class="nocmd-card">
+      <span class="nocmd-tag">Attackvektor 01</span>
+      <h3>Prompt injection via Teams-kanalen</h3>
+      <p>
+        En angripare skickar ett meddelande i en driftkanal med en instruktion till säkerhetsboten.
+        <strong>Har ingen effekt.</strong> Säkerhetsbotklienten har ingen koppling från inkommande
+        Teams-meddelanden till NemoClaw-motorn. Meddelandet loggas som övervakningsdata —
+        <em>det exekveras aldrig.</em>
+      </p>
+    </div>
+
+    <div class="nocmd-card">
+      <span class="nocmd-tag">Attackvektor 02</span>
+      <h3>Direktmeddelande till säkerhetsbotens identitet</h3>
+      <p>
+        En angripare försöker kommunicera direkt med botkontot i Teams.
+        <strong>Genererar ett larm.</strong> Kontot svarar inte. Interaktionsförsöket
+        tidsstämplas, bevismaterial bevaras och säkerhetsteamet notifieras i
+        #security-alerts — <em>utan att driftflödet påverkas.</em>
+      </p>
+    </div>
+
+    <div class="nocmd-card">
+      <span class="nocmd-tag">Attackvektor 03</span>
+      <h3>SSH-inlogg med komprometterade säkerhetsinstansuppgifter</h3>
+      <p>
+        Angriparen tar kontroll över säkerhetsinstansen och försöker använda SSH-kontot
+        för att påverka driftinstansen. <strong>Kontot har inga skrivrättigheter.</strong>
+        Filsystemsbegränsningar är i OS-kärnan. Eskaleringsförsök loggas i
+        driftinstansens auditdaemon och <em>flaggas av säkerhetsagentens egna logganalys</em>.
+      </p>
+    </div>
+
+    <div class="nocmd-card">
+      <span class="nocmd-tag">Attackvektor 04</span>
+      <h3>Radering av säkerhetsinstansens loggar</h3>
+      <p>
+        Angriparen komprometterar säkerhetsinstansen och försöker radera bevis.
+        <strong>Audit-databasen är append-only</strong> med signaturer per post.
+        Dessutom replikerar säkerhetsinstansen larmposter till ett externt, isolerat
+        system — <em>angriparen kan inte radera vad som redan skickats.</em>
+      </p>
+    </div>
+
+    <div class="nocmd-card">
+      <span class="nocmd-tag">Attackvektor 05</span>
+      <h3>Lateral förflyttning via säkerhetsinstansen till OT</h3>
+      <p>
+        En angripare på säkerhetsinstansen försöker nå OT-nätverket.
+        <strong>VLAN-ACL:er på switcknivå blockerar all trafik</strong> utom
+        SSH mot driftinstansen och Teams-API utgående.
+        Säkerhetsinstansen har ingen routad väg till VLAN 10 (OT) eller VLAN 20 (Mgmt) —
+        <em>det är en nätverksarkitekturrestriktion, inte en mjukvarurestriktion.</em>
+      </p>
+    </div>
+
+    <div class="nocmd-card">
+      <span class="nocmd-tag">Attackvektor 06</span>
+      <h3>Förgiftning av Teams-konversationsdata</h3>
+      <p>
+        En angripare försöker lura säkerhetsagentens AI-analys genom att plantera
+        normaliserande mönster i konversationer över tid — för att dölja framtida
+        attacker i baselinen. <strong>Säkerhetsinstansen korrelerar alltid mot
+        OT-auditloggar oberoende av Teams-data</strong> — ett spår måste synas i båda
+        källorna för att väljas bort som falskt positiv.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- EU COMPLIANCE SKILLS -->
+<section class="compliance-section" id="compliance">
+  <div class="grid-bg"></div>
+  <div class="section-label" data-num="09">Regelverksskills</div>
+  <h2 class="section-title reveal">AI Act. NIS2. CRA.<br><span class="accent-red">Inbyggt — inte påklistrat.</span></h2>
+
+  <p class="compliance-intro reveal reveal-delay-1">
+    openAut Security har tre specialiserade skills för EU:s regulatoriska ramverk. Varje skill kombinerar
+    <strong>passiv övervakning</strong> — flaggar avvikelser i realtid — med <strong>aktiv assistans</strong>:
+    hjälper compliance-ansvariga att förstå krav, generera dokumentation och svara på revisorer.
+    Skillsen delar underliggande data men analyserar mot separata regelverksmodeller.
+  </p>
+
+  <!-- SKILL-STACK -->
+  <div class="compliance-stack reveal reveal-delay-2">
+
+    <!-- AI ACT -->
+    <div class="compliance-skill">
+      <div class="compliance-skill-label">
+        <div class="cs-meta">
+          <span class="cs-num">SKILL 01</span>
+          <span class="cs-reg">EU 2024/1689 · Tillämpas från aug 2026</span>
+        </div>
+        <div class="cs-name" style="color:var(--red)">AI Act</div>
+        <span class="cs-badge" style="background:rgba(255,77,77,0.15);color:var(--red);border:1px solid rgba(255,77,77,0.35)">Högrisk-AI · Bilaga III</span>
+      </div>
+      <div class="compliance-skill-content">
+        <div class="cs-left">
+          <div class="cs-section-title">Varför openAut klassas som högrisk</div>
+          <p class="cs-desc">
+            AI Act Bilaga III punkt 2 täcker AI-system för förvaltning av kritisk infrastruktur.
+            openAut analyserar och kan påverka el-, värme- och ventilationssystem i byggnader —
+            vilket troligen kvalificerar som högrisk. Klassificeringen avgörs av din organisations
+            jurister, men <strong>AI Act-skillet hjälper er att förbereda för det scenariot från dag ett.</strong>
+          </p>
+          <div class="cs-section-title" style="margin-top:1.2rem;">Vad skillen övervakar</div>
+          <div class="cs-monitor-list">
+            <div class="cs-monitor-item">
+              <span class="cs-monitor-icon" style="color:var(--red)">◆</span>
+              <div>
+                <strong>Mänsklig kontroll (Art. 14)</strong>
+                <p>Flaggar om AI-genererade åtgärdsrekommendationer inte har ett tydligt mänskligt godkännandesteg i loggen. Varje åtgärd som tangerar fältlager måste kunna spåras till ett explicit operatörsbeslut.</p>
+              </div>
+            </div>
+            <div class="cs-monitor-item">
+              <span class="cs-monitor-icon" style="color:var(--red)">◆</span>
+              <div>
+                <strong>Transparens och förklarbarhet (Art. 13)</strong>
+                <p>Kontrollerar att driftbotens svar innehåller konfidensnivå och motivering. Varnar om AI-output når operatörer utan förklarande kontext — svar som "byt modul" utan rotorsakskedja bryter mot Art. 13.</p>
+              </div>
+            </div>
+            <div class="cs-monitor-item">
+              <span class="cs-monitor-icon" style="color:var(--red)">◆</span>
+              <div>
+                <strong>Loggning och auditbarhet (Art. 12)</strong>
+                <p>Verifierar att händelseloggar bevaras i minst den period AI Act kräver, att de är tillräckligt detaljerade för en extern revisor, och att de inte kan ändras i efterhand.</p>
+              </div>
+            </div>
+            <div class="cs-monitor-item">
+              <span class="cs-monitor-icon" style="color:var(--red)">◆</span>
+              <div>
+                <strong>Teknisk dokumentation (Art. 11 + Bilaga IV)</strong>
+                <p>Assisterar i att hålla den tekniska dokumentationen aktuell: modellbeskrivning, träningsdata, testredsultat, riskbedömning, prestandamått. Varnar när dokumentationen inte synkroniserar med deployad version.</p>
+              </div>
+            </div>
+            <div class="cs-monitor-item">
+              <span class="cs-monitor-icon" style="color:var(--red)">◆</span>
+              <div>
+                <strong>Modellprestanda och -drift (Art. 9)</strong>
+                <p>Spårar om AI-systemets precision försämras över tid — t.ex. att rotorsaksanalysen träffar sämre mot nya utrustningstyper. Prestandadrift utan dokumenterad åtgärd är en riskhanteringsbrist.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="cs-right">
+          <div class="cs-section-title">Assistansfunktioner</div>
+          <div class="cs-assist-list">
+            <div class="cs-assist-item">
+              <span class="cs-assist-tag">Genererar</span>
+              <span>Teknisk dokumentation (Bilaga IV-mall)</span>
+            </div>
+            <div class="cs-assist-item">
+              <span class="cs-assist-tag">Genererar</span>
+              <span>Konformitetsbedömningsunderlag</span>
+            </div>
+            <div class="cs-assist-item">
+              <span class="cs-assist-tag">Genererar</span>
+              <span>Riskhanteringsdokumentation (Art. 9)</span>
+            </div>
+            <div class="cs-assist-item">
+              <span class="cs-assist-tag">Svarar</span>
+              <span>Frågor från revisorer om AI-systemets design</span>
+            </div>
+            <div class="cs-assist-item">
+              <span class="cs-assist-tag">Bevakar</span>
+              <span>Uppdateringar till vägledningsdokument från EAIA</span>
+            </div>
+          </div>
+          <div class="cs-callout" style="border-color:rgba(255,77,77,0.3);background:rgba(255,77,77,0.06);">
+            <div class="cs-callout-label" style="color:var(--red)">Notering</div>
+            <p>openAut körs helt lokalt utan molnanrop — vilket eliminerar en stor klass av AI Act-risker (dataöverföring, extern beroende, datasuveränitet). Lokalt hostad LLM-inferens med lokal data är den starkaste möjliga utgångspunkten för Art. 10 och 13-efterlevnad.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="compliance-divider">▼ NIS2-direktivet reglerar miljön openAut opererar i</div>
+
+    <!-- NIS2 -->
+    <div class="compliance-skill">
+      <div class="compliance-skill-label">
+        <div class="cs-meta">
+          <span class="cs-num">SKILL 02</span>
+          <span class="cs-reg">EU 2022/2555 · Implementerad i svensk rätt jan 2025</span>
+        </div>
+        <div class="cs-name" style="color:var(--amber)">NIS2</div>
+        <span class="cs-badge" style="background:rgba(245,166,35,0.12);color:var(--amber);border:1px solid rgba(245,166,35,0.35)">Samhällsviktig verksamhet · Art. 21</span>
+      </div>
+      <div class="compliance-skill-content">
+        <div class="cs-left">
+          <div class="cs-section-title">NIS2 i en fastighetskontext</div>
+          <p class="cs-desc">
+            Kommunala och regionala fastighetsägare som förvaltar samhällsviktig infrastruktur — skolor, sjukhus, energianläggningar — omfattas av NIS2 Art. 21 krav på riskhantering. openAut Security-skillet
+            <strong>mappar direktivets tio åtgärdskategorier mot faktisk systemstatus</strong>
+            och flaggar när en kategori halkar under kravnivå.
+          </p>
+          <div class="cs-section-title" style="margin-top:1.2rem;">Art. 21 — tio åtgärdskategorier</div>
+          <div class="cs-nis2-grid">
+            <div class="cs-nis2-item cs-ok">
+              <span class="cs-nis2-num">a</span>
+              <span>Riskanalys & infosäkerhetspolicyer</span>
+            </div>
+            <div class="cs-nis2-item cs-ok">
+              <span class="cs-nis2-num">b</span>
+              <span>Hantering av incidenter</span>
+            </div>
+            <div class="cs-nis2-item cs-ok">
+              <span class="cs-nis2-num">c</span>
+              <span>Kontinuitet & krishantering</span>
+            </div>
+            <div class="cs-nis2-item cs-ok">
+              <span class="cs-nis2-num">d</span>
+              <span>Leverantörskedjesäkerhet</span>
+            </div>
+            <div class="cs-nis2-item cs-ok">
+              <span class="cs-nis2-num">e</span>
+              <span>Säkerhet i systemlivscykeln</span>
+            </div>
+            <div class="cs-nis2-item cs-ok">
+              <span class="cs-nis2-num">f</span>
+              <span>Sårbarhetsbedömning & hantering</span>
+            </div>
+            <div class="cs-nis2-item cs-ok">
+              <span class="cs-nis2-num">g</span>
+              <span>Krypteringspolicyer</span>
+            </div>
+            <div class="cs-nis2-item cs-ok">
+              <span class="cs-nis2-num">h</span>
+              <span>HR-säkerhet & åtkomstkontroll</span>
+            </div>
+            <div class="cs-nis2-item cs-ok">
+              <span class="cs-nis2-num">i</span>
+              <span>Multi-faktorautentisering</span>
+            </div>
+            <div class="cs-nis2-item cs-ok">
+              <span class="cs-nis2-num">j</span>
+              <span>Säker kommunikation (voice, video, text)</span>
+            </div>
+          </div>
+        </div>
+        <div class="cs-right">
+          <div class="cs-section-title">Vad skillen övervakar</div>
+          <div class="cs-monitor-list">
+            <div class="cs-monitor-item">
+              <span class="cs-monitor-icon" style="color:var(--amber)">◆</span>
+              <div>
+                <strong>Incidentrapportering (Art. 23)</strong>
+                <p>NIS2 kräver tidig varning inom 24h och fullständig rapport inom 72h vid signifikanta incidenter. Skillen spårar detekterade incidenter mot dessa tidsgränser och larmar compliance-ansvarig om rapporteringsfönstret riskerar att missas.</p>
+              </div>
+            </div>
+            <div class="cs-monitor-item">
+              <span class="cs-monitor-icon" style="color:var(--amber)">◆</span>
+              <div>
+                <strong>Leverantörskedjesäkerhet (Art. 21d)</strong>
+                <p>Granskar att alla tredjepartsintegrationer — BMS-leverantörer, protokolldrivrutiner, edge-hårdvara — har dokumenterade säkerhetskrav i avtalen. Flaggar integrationer utan NIS2-kompatibla leverantörsavtal.</p>
+              </div>
+            </div>
+            <div class="cs-monitor-item">
+              <span class="cs-monitor-icon" style="color:var(--amber)">◆</span>
+              <div>
+                <strong>Åtkomstkontroll och MFA (Art. 21h/i)</strong>
+                <p>Kontrollerar att administrativa åtkomster till openAut-systemet skyddas med MFA och att inga delade konton används. Varnar vid konton utan aktivitetsspår under längre perioder.</p>
+              </div>
+            </div>
+          </div>
+          <div class="cs-assist-list" style="margin-top:1.2rem;">
+            <div class="cs-section-title">Assistansfunktioner</div>
+            <div class="cs-assist-item">
+              <span class="cs-assist-tag" style="background:rgba(245,166,35,0.15);color:var(--amber)">Genererar</span>
+              <span>Incidentrapporter i NIS2-format (24h/72h)</span>
+            </div>
+            <div class="cs-assist-item">
+              <span class="cs-assist-tag" style="background:rgba(245,166,35,0.15);color:var(--amber)">Genererar</span>
+              <span>Riskanalysdokumentation (Art. 21a)</span>
+            </div>
+            <div class="cs-assist-item">
+              <span class="cs-assist-tag" style="background:rgba(245,166,35,0.15);color:var(--amber)">Bevakar</span>
+              <span>ENISA-riktlinjer och NCSC-SE vägledning</span>
+            </div>
+            <div class="cs-assist-item">
+              <span class="cs-assist-tag" style="background:rgba(245,166,35,0.15);color:var(--amber)">Svarar</span>
+              <span>Frågor inför DISA/MSB-tillsyn</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="compliance-divider">▼ CRA reglerar openAut-mjukvaran som produkt</div>
+
+    <!-- CRA -->
+    <div class="compliance-skill">
+      <div class="compliance-skill-label">
+        <div class="cs-meta">
+          <span class="cs-num">SKILL 03</span>
+          <span class="cs-reg">EU 2024/2847 · Fullt tillämpligt dec 2027</span>
+        </div>
+        <div class="cs-name" style="color:var(--cyan)">CRA</div>
+        <span class="cs-badge" style="background:rgba(0,200,224,0.1);color:var(--cyan);border:1px solid rgba(0,200,224,0.3)">Cyber Resilience Act · Produktkrav</span>
+      </div>
+      <div class="compliance-skill-content">
+        <div class="cs-left">
+          <div class="cs-section-title">CRA i en openAut-kontext</div>
+          <p class="cs-desc">
+            CRA gäller <em>produkter med digitala element</em> — mjukvara och hårdvara med nätverksanslutning.
+            openAut-mjukvaran faller under denna definition. MIT-licens och öppen källkod innebär inte
+            undantag, men CRA har specifika lättnader för öppen källkod som inte distribueras kommersiellt.
+            <strong>CRA-skillets primära uppgift: hålla er redo oavsett hur definitionen landar.</strong>
+          </p>
+          <div class="cs-section-title" style="margin-top:1.2rem;">Vad skillen övervakar</div>
+          <div class="cs-monitor-list">
+            <div class="cs-monitor-item">
+              <span class="cs-monitor-icon" style="color:var(--cyan)">◆</span>
+              <div>
+                <strong>SBOM — Software Bill of Materials (Bilaga I)</strong>
+                <p>CRA kräver en aktuell komponentförteckning för alla digitala produkter. Skillen spårar openAuts beroenden — pymodbus, BAC0, opcua-asyncio, NemoClaw — och flaggar om en komponent har känd sårbarhet (CVE) utan tillämpad patch.</p>
+              </div>
+            </div>
+            <div class="cs-monitor-item">
+              <span class="cs-monitor-icon" style="color:var(--cyan)">◆</span>
+              <div>
+                <strong>Sårbarhetspolicy och -hantering (Art. 13)</strong>
+                <p>CRA kräver en publicerad policy för sårbarhetsmottagning och koordinerad rapportering. Skillen kontrollerar att openAuts security.txt och disclosure-policy är aktuella och att inkomna rapporter hanteras inom rimlig tid.</p>
+              </div>
+            </div>
+            <div class="cs-monitor-item">
+              <span class="cs-monitor-icon" style="color:var(--cyan)">◆</span>
+              <div>
+                <strong>Aktivt utnyttjade sårbarheter (Art. 14)</strong>
+                <p>Aktivt utnyttjade sårbarheter i openAut-komponenter måste rapporteras till ENISA och relevant CSIRT inom 24h — samma tidsgräns som NIS2. Skillen bevakar CVE-databasen mot SBOM och eskalerar omedelbart vid träff.</p>
+              </div>
+            </div>
+            <div class="cs-monitor-item">
+              <span class="cs-monitor-icon" style="color:var(--cyan)">◆</span>
+              <div>
+                <strong>Säkerhetsuppdateringar under supportperiod (Art. 13)</strong>
+                <p>CRA kräver att säkerhetsuppdateringar tillgängliggörs under produktens förväntade livslängd. Skillen spårar att openAut-releasen organisationen kör inte är End-of-Life och att kritiska patcher finns tillgängliga utan onödigt dröjsmål.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="cs-right">
+          <div class="cs-section-title">Assistansfunktioner</div>
+          <div class="cs-monitor-list">
+            <div class="cs-monitor-item">
+              <span class="cs-monitor-icon" style="color:var(--cyan)">◆</span>
+              <div>
+                <strong>SBOM-generering och -underhåll</strong>
+                <p>Läser openAuts deploya beroenden via SSH från driftinstansen och genererar en aktuell SBOM i CycloneDX- eller SPDX-format. Uppdateras automatiskt vid ny deployment och sparas i revisionsloggen.</p>
+              </div>
+            </div>
+            <div class="cs-monitor-item">
+              <span class="cs-monitor-icon" style="color:var(--cyan)">◆</span>
+              <div>
+                <strong>CE-märkningsdokumentation</strong>
+                <p>Om openAut distribueras på ett sätt som kräver CE-märkning assisterar skillen med att sammanställa teknisk dokumentation och EU-försäkran om överensstämmelse — även om MIT-licensen inte i sig kräver det.</p>
+              </div>
+            </div>
+          </div>
+          <div class="cs-assist-list" style="margin-top:1.2rem;">
+            <div class="cs-assist-item">
+              <span class="cs-assist-tag" style="background:rgba(0,200,224,0.1);color:var(--cyan)">Genererar</span>
+              <span>SBOM (CycloneDX / SPDX) vid varje release</span>
+            </div>
+            <div class="cs-assist-item">
+              <span class="cs-assist-tag" style="background:rgba(0,200,224,0.1);color:var(--cyan)">Genererar</span>
+              <span>24h-notifiering till ENISA/CSIRT vid CVE-träff</span>
+            </div>
+            <div class="cs-assist-item">
+              <span class="cs-assist-tag" style="background:rgba(0,200,224,0.1);color:var(--cyan)">Bevakar</span>
+              <span>CVE-databas mot SBOM dagligen</span>
+            </div>
+            <div class="cs-assist-item">
+              <span class="cs-assist-tag" style="background:rgba(0,200,224,0.1);color:var(--cyan)">Svarar</span>
+              <span>Frågor inför marknadstillsyn (MSB/Swedac)</span>
+            </div>
+          </div>
+          <div class="cs-callout" style="border-color:rgba(0,200,224,0.25);background:rgba(0,200,224,0.05);">
+            <div class="cs-callout-label" style="color:var(--cyan)">Öppen källkod och CRA</div>
+            <p>CRA Skäl 18–19 ger lättnader för öppen källkod som inte distribueras i en kommersiell transaktion. Eftersom openAut är MIT-licensierat och gratis kan din organisation falla utanför tillverkaransvaret — men om ni anpassar och distribuerar openAut internt i upphandlad form kan ni klassas som distributör. Skillen hjälper er att utreda er specifika situation.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- REGELVERKSÖVERLAPP -->
+  <div class="compliance-overlap reveal reveal-delay-3">
+    <div class="co-title">Där regelverken möts — och förstärker varandra</div>
+    <div class="co-grid">
+      <div class="co-item">
+        <div class="co-regs"><span style="color:var(--red)">AI Act</span> + <span style="color:var(--amber)">NIS2</span></div>
+        <div class="co-desc">Incidentrapportering vid AI-systemfel. En AI-driven feldetektering som missar ett kritiskt OT-fel kan vara en NIS2-incident och ett AI Act-systemfel simultaneously. Dubbel rapporteringsplikt måste koordineras.</div>
+      </div>
+      <div class="co-item">
+        <div class="co-regs"><span style="color:var(--amber)">NIS2</span> + <span style="color:var(--cyan)">CRA</span></div>
+        <div class="co-desc">Sårbarhetshantering och leverantörskedja. CRA kräver SBOM och patchpolicy för produkten — NIS2 kräver leverantörsavtal och dokumenterad kedjesäkerhet. En CVE i en openAut-beroende triggar krav under båda regelverken.</div>
+      </div>
+      <div class="co-item">
+        <div class="co-regs"><span style="color:var(--red)">AI Act</span> + <span style="color:var(--cyan)">CRA</span></div>
+        <div class="co-desc">Teknisk dokumentation. AI Act Bilaga IV kräver systemdokumentation. CRA kräver teknisk dokumentation för produkten. En sammanhållen dokumentationsstruktur täcker båda — skillen genererar en gemensam dokumentationsbas.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">open<span>Aut</span> Security</div>
+  <div class="footer-meta">
+    MIT-licens · IT/OT-säkerhetsagent för openAut<br>
+    <a href="/">openaut.io</a> · <a href="/topologi.html">Systemtopologi</a> · <a href="https://github.com/openaut">github.com/openaut</a>
+  </div>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
