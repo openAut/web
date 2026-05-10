@@ -2,7 +2,7 @@
 
 > Öppen AI-plattform för fastighetsautomation med lokal inferens, Python edge-reglering och ingen leverantörsinlåsning.
 
-openAut är ett **öppet tillägg till ditt befintliga BMS** — inte en ersättare. Plattformen samlar in driftsdata, analyserar den lokalt med kraftfull AI-hårdvara, och kan driftsätta Python-baserad reglering direkt på edge-noder. Designat för offentlig upphandling, IEC 62443-säkerhet och långsiktig förvaltning.
+openAut är ett **öppet tillägg till ditt befintliga BMS** — inte en ersättare. Plattformen samlar in driftsdata via MQTT over TLS, analyserar den lokalt med kraftfull AI-hårdvara, och kan driftsätta Python-baserad reglering direkt på edge-noder. Designat för offentlig upphandling, IEC 62443-säkerhet och långsiktig förvaltning.
 
 **Hemsida:** https://openaut.io · **Licens:** MIT · **Status:** v0.1 — aktiv utveckling
 
@@ -14,7 +14,7 @@ openAut är ett **öppet tillägg till ditt befintliga BMS** — inte en ersätt
 - **Energioptimering:** Prediktion, lastprognos och avvikelseanalys mot historisk trenddata.
 - **Guidad integration:** Läs in en fabrikants manual, ange edge-nod — openAut guidar teknikern steg för steg och dokumenterar automatiskt.
 - **Python edge-reglering:** Driftsätt Python-baserade reglerloopar direkt på edge-noden mot lokal I/O. Utan rundtur till AI-servern. Versionshanterat, loggat och återkallelsebart centralt via NemoClaw.
-- **Automatisk dokumentation:** I/O-listor, driftsättningsprotokoll och FAT/SAT genereras som sidoeffekt av normal drift.
+- **Automatisk dokumentation:** I/O-listor, MQTT topic-schema, driftsättningsprotokoll och FAT/SAT genereras som sidoeffekt av normal drift.
 
 ---
 
@@ -22,16 +22,18 @@ openAut är ett **öppet tillägg till ditt befintliga BMS** — inte en ersätt
 
 ```
 LAGER 04 — GRÄNSSNITT   Teams · Slack · Webb-HMI · REST API
-LAGER 03 — AI           NemoClaw · DGX Spark · LLM-inferens · FDD · Energioptimering
+LAGER 03 — AI           NemoClaw · DGX Spark · LLM · FDD · Energioptimering
+                         EMQX-broker · Telegraf (ingest) · TimescaleDB/PostgreSQL
 LAGER 02 — EDGE         Linux-noder · SSH · Protokolldrivrutiner · Python edge-reglering
-LAGER 01 — FÄLT         BACnet · Modbus RTU/TCP · M-Bus · OPC UA · LoRaWAN · KNX · DALI
+                         MQTT over TLS (stream + on-demand request/response via topics)
+LAGER 01 — FÄLT         Modbus RTU/TCP · BACnet · M-Bus · LoRaWAN · KNX · DALI
 ```
 
-**LAGER 01 — FÄLT:** Befintlig fältutrustning ansluts utan modifiering. PLC:er, DDC-regulatorer och mätare kommunicerar via sina befintliga protokoll. openAut läser — fältets reglering behåller prioritet.
+**LAGER 01 — FÄLT:** Befintlig fältutrustning ansluts utan modifiering. PLC:er, DDC-regulatorer och mätare kommunicerar via sina befintliga fältprotokoll. openAut läser — fältets reglering behåller prioritet.
 
-**LAGER 02 — EDGE:** Siemens SIMATIC IOT2050-noder kör standard Linux och nås av NemoClaw via krypterad SSH. Protokolldrivrutiner körs direkt på noden. NemoClaw kan via SSH även driftsätta Python-regleringsskript mot lokal I/O — slutna reglerloopar utan molnrundtur. Data transporteras krypterat via OPC UA (Basic256Sha256) eller MQTT over TLS.
+**LAGER 02 — EDGE:** Siemens SIMATIC IOT2050-noder kör standard Linux och nås av NemoClaw via krypterad SSH. Protokolldrivrutiner körs direkt på noden. NemoClaw kan via SSH även driftsätta Python-regleringsskript mot lokal I/O — slutna reglerloopar utan molnrundtur. Data transporteras krypterat till EMQX-brokern via MQTT over TLS — både som kontinuerlig mätström och som on-demand request/response via topics.
 
-**LAGER 03 — AI:** NVIDIA DGX Spark (GB10 Grace Blackwell, 128 GB unified memory, 1 PFLOP FP4) kör NemoClaw och OpenClaw lokalt. MQTT-broker, LLM-inferens och FDD-modeller på samma hårdvara. All data stannar i fastigheten.
+**LAGER 03 — AI:** NVIDIA DGX Spark (GB10 Grace Blackwell, 128 GB unified memory, 1 PFLOP FP4) kör EMQX-brokern, Telegraf (ingest till TimescaleDB/PostgreSQL) och NemoClaw lokalt. NemoClaw läser historik och skriver analyser och larm till masterdatabasen. All data stannar i fastigheten.
 
 **LAGER 04 — GRÄNSSNITT:** Insikter når de som behöver dem i de verktyg de redan använder. Drifttekniker i Teams. Energisamordnare i dashboard. Integrationsteam via REST API.
 
@@ -41,14 +43,16 @@ LAGER 01 — FÄLT         BACnet · Modbus RTU/TCP · M-Bus · OPC UA · LoRaWA
 
 | Lager | Komponenter |
 |---|---|
-| **openAut** (domänramverk) | BACnet-skill · Modbus-skill · M-Bus-skill · LoRa-skill · OPC UA-skill · FDD-skill · Energianalys-skill · SSH edge-access · Python I/O-skill · Edge-reglerings-skill |
+| **openAut** (domänramverk) | BACnet-skill · Modbus-skill · M-Bus-skill · LoRa-skill · FDD-skill · Energianalys-skill · SSH edge-access · Python I/O-skill · Edge-reglerings-skill |
 | **NemoClaw** (agent) | Anthropic Claude Agent SDK · MCP · lokalt körd · ARM64 |
 | **OpenClaw** (LLM) | Öppen källkod · ≤200B parametrar · lokal inferens |
 | **AI-hårdvara** | NVIDIA DGX Spark · ASUS Ascent GX10 (alternativ) |
 | **Edge-hårdvara** | Siemens SIMATIC IOT2050 |
 | **I/O-modul** | Siemens EM1.8U (8× universell I/O · Modbus RTU · RS485) |
-| **Transport** | OPC UA Basic256Sha256 · MQTT over TLS · WireGuard VPN |
-| **Databas** | PostgreSQL · TimescaleDB · Haystack · Brick Schema |
+| **MQTT-broker** | EMQX · TLS · klientcertifikat · request/response-topics |
+| **Ingest** | Telegraf (EMQX → TimescaleDB) |
+| **Transport** | MQTT over TLS · WireGuard VPN |
+| **Databas** | TimescaleDB · PostgreSQL · Haystack · Brick Schema |
 
 ---
 
@@ -61,7 +65,7 @@ openAut kan driftsätta Python-baserad reglering direkt på edge-noder via I/O, 
 All inferens körs på den lokala AI-servern i fastigheten. Ingen driftdata lämnar byggnaden om du inte aktivt konfigurerar det.
 
 **P.03 — Kräver inga proprietära beroenden**
-Kärnstacken körs helt på öppen källkod: `pymodbus`, `opcua-asyncio`, `BAC0`, `open62541` med flera. Inga proprietära drivrutiner eller licenser.
+Kärnstacken körs helt på öppen källkod: `pymodbus`, `BAC0`, `paho-mqtt`, EMQX, Telegraf, TimescaleDB med flera. Inga proprietära drivrutiner eller licenser.
 
 **P.04 — Ersätter inte ditt befintliga BMS**
 openAut samexisterar med Desigo CC, EcoStruxure, Trend, Regin, Niagara och alla andra plattformar. Det läser deras data — konkurrerar aldrig med dem.
@@ -85,7 +89,7 @@ Arkitekturen är modulär, dokumenterad och kan tas vid av vilken kompetent inte
 | Siemens SIMATIC IOT2050 | TI AM6548 · 4× A53 · 1 GHz | RS232/422/485 · 2× GbE · Arduino Shield | Python-regulator och datainsamlare via SSH |
 | Siemens EM1.8U | — | 8× universell I/O · Modbus RTU · RS485 | Industriell I/O, upp till 31 moduler per buss |
 
-Hela stacken är ARM64-nativ. `pymodbus`, `opcua-asyncio`, `BAC0` och `open62541` är verifierade på ARM64 utan proprietära beroenden.
+Hela stacken är ARM64-nativ. `pymodbus`, `paho-mqtt` och `BAC0` är verifierade på ARM64 utan proprietära beroenden.
 
 ---
 
@@ -95,10 +99,13 @@ Säkerhet är inbyggt från dag ett, inte tillagt i efterhand:
 
 - **IEC 62443** och **NIS2** är baskrav
 - VLAN-segmentering per lager
-- OPC UA Basic256Sha256 för all datatransport
+- MQTT over TLS med klientcertifikat för all datatransport från edge-noder
 - WireGuard VPN för fjärråtkomst
 - RBAC och auditloggning
 - Regleringskod versionshanteras och granskas som konfiguration
+- Säkerhetsagent på separat fysisk hårdvara med read-only SSH-åtkomst
+
+Se fullständig hotmodell och säkerhetsarkitektur: https://openaut.io/security.html
 
 ---
 
@@ -110,23 +117,28 @@ En lösning som en kommun bygger kan återanvändas av alla andra. Bidrag tillba
 
 ---
 
-## Protokollstöd
+## Fältprotokollstöd (edge → fält)
 
-`BACnet/IP` · `BACnet MS/TP` · `Modbus RTU` · `Modbus TCP` · `M-Bus` · `OPC UA` · `MQTT` · `LoRaWAN (EU868)` · `KNX` · `DALI`
+`Modbus RTU` · `Modbus TCP` · `BACnet/IP` · `BACnet MS/TP` · `M-Bus` · `LoRaWAN (EU868)` · `KNX` · `DALI`
+
+**Transport edge → AI-lager:** `MQTT over TLS` via EMQX-broker (kontinuerlig ström och on-demand request/response)
 
 ---
 
 ## Kom igång
 
 ```bash
-# Utforska projektet
-https://github.com/openaut
-
 # Hemsida och dokumentation
 https://openaut.io
 
-# Systemtopologi
+# Systemtopologi — lager, protokoll, dataflöden och referenshårdvara
 https://openaut.io/topologi.html
+
+# IT/OT-säkerhet — hotmodell, säkerhetsarkitektur och compliance
+https://openaut.io/security.html
+
+# Källkod
+https://github.com/openaut
 ```
 
 Projektet är under aktiv utveckling och redo för pilotdriftsättningar. Bidra med en protokolldrivrutin, anpassa en applikationsprofil, eller testa edge-reglering mot din befintliga I/O-hårdvara.
