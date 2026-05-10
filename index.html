@@ -1670,7 +1670,7 @@
     <span class="ticker-item accent">MIT-licens</span>
     <span class="ticker-item">Ingen leverantörslåsning</span>
     <span class="ticker-item accent">Komplement till befintligt BMS</span>
-    <span class="ticker-item">BACnet · Modbus · OPC UA · M-Bus · KNX · DALI</span>
+    <span class="ticker-item">BACnet · Modbus · M-Bus · KNX · DALI · LoRaWAN</span>
     <span class="ticker-item accent">LOU-kompatibelt</span>
     <span class="ticker-item">IEC 62443 säkerhet</span>
     <span class="ticker-item accent">Anslut mot fältutrustning</span>
@@ -1684,7 +1684,7 @@
     <span class="ticker-item accent">MIT-licens</span>
     <span class="ticker-item">Ingen leverantörslåsning</span>
     <span class="ticker-item accent">Komplement till befintligt BMS</span>
-    <span class="ticker-item">BACnet · Modbus · OPC UA · M-Bus · KNX · DALI</span>
+    <span class="ticker-item">BACnet · Modbus · M-Bus · KNX · DALI · LoRaWAN</span>
     <span class="ticker-item accent">LOU-kompatibelt</span>
     <span class="ticker-item">IEC 62443 säkerhet</span>
     <span class="ticker-item accent">Anslut mot fältutrustning</span>
@@ -1892,7 +1892,7 @@
           <span class="guided-step-num">05</span>
           <div>
             <h4>Dokumentationen skriver sig själv</h4>
-            <p>I/O-lista, kommunikationstabell, OPC UA-namnrymd och nätverksdiagram uppdateras automatiskt. <strong>Nästa tekniker har fullständig dokumentation från dag ett</strong> — oavsett vem som utförde driftsättningen.</p>
+            <p>I/O-lista, kommunikationstabell, MQTT topic-schema och nätverksdiagram uppdateras automatiskt. <strong>Nästa tekniker har fullständig dokumentation från dag ett</strong> — oavsett vem som utförde driftsättningen.</p>
           </div>
         </div>
 
@@ -2042,7 +2042,6 @@
           <span class="stack-chip green">Modbus-skill</span>
           <span class="stack-chip green">M-Bus-skill</span>
           <span class="stack-chip green">LoRa-skill</span>
-          <span class="stack-chip green">OPC UA-skill</span>
           <span class="stack-chip green">FDD-skill (feldetektering)</span>
           <span class="stack-chip green">Energianalys-skill</span>
           <span class="stack-chip green">Integrationsguide-skill</span>
@@ -2050,8 +2049,7 @@
           <span class="stack-chip">SSH edge-access</span>
           <span class="stack-chip">Python I/O-skill</span>
           <span class="stack-chip">Edge-reglerings-skill</span>
-          <span class="stack-chip">MQTT over TLS</span>
-          <span class="stack-chip">OPC UA krypterad transport</span>
+          <span class="stack-chip">MQTT over TLS (stream + req/resp)</span>
           <span class="stack-chip">Teams-integration</span>
           <span class="stack-chip">Slack-integration</span>
           <span class="stack-chip">Webb-HMI</span>
@@ -2105,7 +2103,7 @@
     <div class="arch-layer">
       <div class="arch-layer-num">LAGER 02 — EDGE</div>
       <div class="arch-layer-name">Linux-baserade edge-noder</div>
-      <div class="arch-layer-desc">Siemens SIMATIC IOT2050-noder kör standard Linux och nås av NemoClaw via krypterad SSH. openAuts protokolldrivrutiner körs direkt på noden och läser data från fältutrustning via Modbus, M-Bus, LoRa eller annat fältprotokoll. Data transporteras krypterat till masterdatabasen via OPC UA eller MQTT over TLS — ingen proprietär middleware.</div>
+      <div class="arch-layer-desc">Siemens SIMATIC IOT2050-noder kör standard Linux och nås av NemoClaw via krypterad SSH. openAuts protokolldrivrutiner körs direkt på noden och läser data från fältutrustning via Modbus, M-Bus, LoRa eller annat fältprotokoll. Data transporteras krypterat till EMQX-brokern via MQTT over TLS — både som kontinuerlig mätström och som on-demand request/response via topics. Ingen proprietär middleware.</div>
       <div class="arch-user-view">NemoClaw sköter installation och konfiguration via SSH. Inga manuella ingrepp på noden. NemoClaw kan via samma SSH-åtkomst även driftsätta Python-baserade regleringsskript direkt på edge-noden. Skripten kör slutna reglerloopar mot lokal I/O — utan rundtur till AI-servern — och uppdateras, versionshanteras och återkallas centralt via NemoClaw. Regleringskod behandlas som konfiguration: granskningsbar, reproducerbar och alltid under operatörens kontroll.</div>
       <div class="arch-nodes">
         <div class="arch-node green">SSH-åtkomst (krypterad)</div>
@@ -2114,18 +2112,20 @@
         <div class="arch-node green">Lokal 24–72h buffer</div>
         <div class="arch-node green">Python edge-reglering</div>
         <div class="arch-node green">Versionshanterad regelkod</div>
-        <div class="arch-node cyan">→ OPC UA (Basic256Sha256)</div>
-        <div class="arch-node cyan">→ MQTT over TLS</div>
+        <div class="arch-node cyan">→ MQTT over TLS (EMQX-broker)</div>
+        <div class="arch-node cyan">→ Stream · On-demand req/resp</div>
       </div>
     </div>
 
     <div class="arch-layer">
       <div class="arch-layer-num">LAGER 03 — AI</div>
       <div class="arch-layer-name">Masterdatabas & AI-analys</div>
-      <div class="arch-layer-desc">DGX Spark tar emot krypterad data från alla edge-noder via OPC UA eller MQTT och lagrar den i en central tidsseriedatabas. NemoClaw-agenten analyserar kontinuerligt mot denna databas med lokala språkmodeller och specialiserade detektionsmodeller — allt på samma hårdvara, utan externa anrop.</div>
+      <div class="arch-layer-desc">EMQX-brokern tar emot MQTT over TLS från alla edge-noder och Telegraf skriver datan till TimescaleDB/PostgreSQL (masterdatabasen). NemoClaw-agenten läser historik och skriver analyser och larm till masterdatabasen — med lokala språkmodeller och specialiserade detektionsmodeller, allt på samma hårdvara, utan externa anrop. On-demand-förfrågningar till edge-noder sker via MQTT request/response-topics.</div>
       <div class="arch-user-view">All data stannar i byggnaden. GDPR-säkert per design.</div>
       <div class="arch-nodes">
-        <div class="arch-node cyan">Tidsseriedatabas (master)</div>
+        <div class="arch-node cyan">EMQX-broker (MQTT over TLS)</div>
+        <div class="arch-node cyan">Telegraf (ingest → TimescaleDB)</div>
+        <div class="arch-node cyan">TimescaleDB / PostgreSQL (master)</div>
         <div class="arch-node cyan">Lokal LLM-inferens</div>
         <div class="arch-node cyan">Feldetektering (FDD)</div>
         <div class="arch-node cyan">Energioptimering</div>
@@ -2260,7 +2260,7 @@
         <h4>Varför <span>ARM64</span> är strategiskt rätt val</h4>
       </div>
       <div>
-        <p>ARM64 (ARMv9-A) har blivit den dominerande arkitekturen för energieffektiv AI-inferens. Unified memory — där CPU och GPU delar samma minnesutrymme — är avgörande för att köra stora språkmodeller lokalt utan prestandaförlust. Hela openAut-stacken är verifierad på ARM64: <code style="font-family:var(--mono);font-size:0.8em;color:var(--cyan)">pymodbus</code>, <code style="font-family:var(--mono);font-size:0.8em;color:var(--cyan)">opcua-asyncio</code>, <code style="font-family:var(--mono);font-size:0.8em;color:var(--cyan)">BAC0</code>, <code style="font-family:var(--mono);font-size:0.8em;color:var(--cyan)">open62541</code> och alla AI-ramverk. Inga proprietära beroenden i kärnlösningen — oavsett hårdvaruleverantör.</p>
+        <p>ARM64 (ARMv9-A) har blivit den dominerande arkitekturen för energieffektiv AI-inferens. Unified memory — där CPU och GPU delar samma minnesutrymme — är avgörande för att köra stora språkmodeller lokalt utan prestandaförlust. Hela openAut-stacken är verifierad på ARM64: <code style="font-family:var(--mono);font-size:0.8em;color:var(--cyan)">pymodbus</code>, <code style="font-family:var(--mono);font-size:0.8em;color:var(--cyan)">BAC0</code>, <code style="font-family:var(--mono);font-size:0.8em;color:var(--cyan)">paho-mqtt</code> och alla AI-ramverk. Inga proprietära beroenden i kärnlösningen — oavsett hårdvaruleverantör.</p>
       </div>
     </div>
 
@@ -2354,21 +2354,21 @@
       <div class="oss-card-icon">🔌</div>
       <span class="oss-card-tag">Arkitektur</span>
       <h3>Ingen proprietär kärna</h3>
-      <p>Hela stacken körs på öppen källkod: <code>pymodbus</code>, <code>BAC0</code>, <code>opcua-asyncio</code>, <code>open62541</code>, Mosquitto. Om du redan har licens för Kepware eller liknande ansluts det — men det krävs aldrig.</p>
+      <p>Hela stacken körs på öppen källkod: <code>pymodbus</code>, <code>BAC0</code>, <code>paho-mqtt</code>, EMQX, Telegraf, TimescaleDB. Om du redan har licens för Kepware eller liknande ansluts det — men det krävs aldrig.</p>
     </div>
 
     <div class="oss-card">
       <div class="oss-card-icon">🔄</div>
       <span class="oss-card-tag">Reproducerbarhet</span>
       <h3>Vilken tekniker som helst kan ta vid</h3>
-      <p>Varje applikationsprofil är självständig: hårdvaruval, protokollkonfiguration, OPC UA-namnrymder, AI-parametrar, FAT/SAT-checklistor. En tekniker som aldrig sett din fastighet kan driftsätta openAut från dokumentationen.</p>
+      <p>Varje applikationsprofil är självständig: hårdvaruval, protokollkonfiguration, MQTT topic-schema, AI-parametrar, FAT/SAT-checklistor. En tekniker som aldrig sett din fastighet kan driftsätta openAut från dokumentationen.</p>
     </div>
 
     <div class="oss-card">
       <div class="oss-card-icon">🛡</div>
       <span class="oss-card-tag">Säkerhet</span>
       <h3>Säker by design</h3>
-      <p>IEC 62443 och NIS2 är inbyggda från dag ett — inte tillagda i efterhand. VLAN-segmentering, OPC UA Basic256Sha256, WireGuard VPN, RBAC och auditloggning är baskrav, inte tillval.</p>
+      <p>IEC 62443 och NIS2 är inbyggda från dag ett — inte tillagda i efterhand. VLAN-segmentering, MQTT over TLS med klientcertifikat, WireGuard VPN, RBAC och auditloggning är baskrav, inte tillval.</p>
     </div>
 
   </div>
