@@ -1243,14 +1243,14 @@ footer {
             <span class="perm-badge pb-read">Läs</span>
           </div>
           <div class="ssh-perm-row">
-            <span class="perm-icon">🚫</span>
+            <span class="perm-icon">📋</span>
             <span class="perm-name">/etc/openaut/</span>
-            <span class="perm-badge pb-deny">Nekat</span>
+            <span class="perm-badge pb-read">Läs</span>
           </div>
           <div class="ssh-perm-row">
-            <span class="perm-icon">🚫</span>
+            <span class="perm-icon">📋</span>
             <span class="perm-name">/var/lib/openaut/ (data)</span>
-            <span class="perm-badge pb-deny">Nekat</span>
+            <span class="perm-badge pb-read">Läs</span>
           </div>
           <div class="ssh-perm-row">
             <span class="perm-icon">🚫</span>
@@ -1279,9 +1279,9 @@ footer {
           <div><span class="t-sec-prompt">sec-ro@main:~$ </span><span class="t-cmd">tail -n 200 /var/log/openaut/conversations/2025-07-14.log</span></div>
           <div><span class="t-output">... [loggrader] ...</span></div>
           <div class="t-blank"></div>
-          <div><span class="t-comment"># Försök att skriva -- nekas av OS</span></div>
-          <div><span class="t-sec-prompt">sec-ro@main:~$ </span><span class="t-cmd">echo "test" &gt; /etc/openaut/config.yaml</span></div>
-          <div><span class="t-deny">bash: /etc/openaut/config.yaml: Permission denied</span></div>
+          <div><span class="t-comment"># Tillåtet: läsa konfiguration</span></div>
+          <div><span class="t-sec-prompt">sec-ro@main:~$ </span><span class="t-cmd">cat /etc/openaut/config.yaml</span></div>
+          <div><span class="t-output">... [konfigurationsrader] ...</span></div>
           <div class="t-blank"></div>
           <div><span class="t-comment"># Försök att eskalera -- nekas</span></div>
           <div><span class="t-sec-prompt">sec-ro@main:~$ </span><span class="t-cmd">sudo systemctl restart openaut</span></div>
