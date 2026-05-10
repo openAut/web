@@ -769,12 +769,35 @@ footer {
   .arch-connector { flex-direction: row; padding: 1.2rem; border-left: none; border-right: none; border-top: 1px solid var(--border-sec); border-bottom: 1px solid var(--border-sec); }
   .arch-conn-arrow, .arch-conn-label, .arch-conn-block { writing-mode: horizontal-tb; }
   .ssh-grid, .teams-layout, .threat-cols, .hw-compare { grid-template-columns: 1fr; gap: 2.5rem; }
+  .ssh-perm-row { grid-template-columns: 1.8rem 1fr auto; }
+  .ssh-cmd-block { overflow-x: auto; }
+  .ssh-cmd-body { min-width: 520px; }
   .alert-step { grid-template-columns: 1fr; }
   .alert-step-label { border-right: none; border-bottom: 1px solid var(--border-sec); }
   .alert-step-content { grid-template-columns: 1fr; }
   footer { padding: 2rem 1.5rem; flex-direction: column; align-items: flex-start; }
   .footer-meta { text-align: left; }
   .isolation-note { grid-template-columns: 1fr; }
+  .teams-text code { word-break: break-all; }
+}
+
+@media (max-width: 480px) {
+  .nav-badge { display: none; }
+  .nav-logo { font-size: 0.85rem; }
+  .hero-title { font-size: clamp(2rem, 10vw, 2.6rem); }
+  .section-title { font-size: clamp(1.6rem, 7vw, 2rem); }
+  .tp-card { padding: 2rem 1.4rem; }
+  .nocmd-card { padding: 1.6rem 1.4rem; }
+  .hw-card { padding: 1.8rem 1.4rem; }
+  .ssh-perm-row { grid-template-columns: 1.8rem 1fr; }
+  .perm-badge { grid-column: 2; }
+  .arch-instance { padding: 1.8rem 1.2rem; }
+  .alert-step-content { padding: 1.4rem 1.2rem; }
+  .alert-step-label { padding: 1.4rem 1.2rem; }
+  .teams-mock { font-size: 0.9em; }
+  .cs-name { font-size: 1.5rem; }
+  .compliance-skill-content { padding: 1.6rem 1.2rem; }
+  .compliance-skill-label { padding: 1.6rem 1.2rem; }
 }
 /* ── COMPLIANCE SKILLS ── */
 .compliance-section {
@@ -962,6 +985,7 @@ footer {
   .cs-nis2-item:nth-child(odd) { border-right: none; }
   .cs-nis2-item:nth-last-child(-n+2) { border-bottom: 1px solid rgba(245,166,35,0.1); }
   .cs-nis2-item:last-child { border-bottom: none; }
+  .compliance-overlap { margin-top: 2rem; }
 }
 </style>
 </head>
@@ -1255,11 +1279,11 @@ footer {
           <div><span class="t-sec-prompt">sec-ro@main:~$ </span><span class="t-cmd">tail -n 200 /var/log/openaut/conversations/2025-07-14.log</span></div>
           <div><span class="t-output">... [loggrader] ...</span></div>
           <div class="t-blank"></div>
-          <div><span class="t-comment"># Forsok att skriva -- nekas av OS</span></div>
+          <div><span class="t-comment"># Försök att skriva -- nekas av OS</span></div>
           <div><span class="t-sec-prompt">sec-ro@main:~$ </span><span class="t-cmd">echo "test" &gt; /etc/openaut/config.yaml</span></div>
           <div><span class="t-deny">bash: /etc/openaut/config.yaml: Permission denied</span></div>
           <div class="t-blank"></div>
-          <div><span class="t-comment"># Forsok att eskalera -- nekas</span></div>
+          <div><span class="t-comment"># Försök att eskalera -- nekas</span></div>
           <div><span class="t-sec-prompt">sec-ro@main:~$ </span><span class="t-cmd">sudo systemctl restart openaut</span></div>
           <div><span class="t-deny">openaut-sec-ro is not in the sudoers file. Incident reported.</span></div>
           <div class="t-blank"></div>
@@ -1675,7 +1699,7 @@ footer {
           Säkerhetsinstansen och driftinstansen kommunicerar via ett VLAN-gränssnitt med explicit ACL:
           SSH port 22 inåt (till driftinstansen) och Teams-API utåt. All annan trafik blockeras av nätverksinfrastrukturen — inte av mjukvara.
           En angripare som tar kontroll över säkerhetsinstansen kan inte använda den som språngbräda mot OT-nätverket
-          eftersom routingtabeller och VLAN-access-listor förbjuder det på switcknivå.
+          eftersom routingtabeller och VLAN-access-listor förbjuder det på switchnivå.
         </p>
       </div>
     </div>
@@ -1689,7 +1713,7 @@ footer {
   <h2 class="section-title reveal">Vad händer om <em style="font-style:normal;color:var(--red)">den</em> attackeras?</h2>
   <p class="threats-intro reveal reveal-delay-1" style="margin-bottom:0;">
     Säkerhetsagenten är designad med antagandet att <strong>även den kan vara ett mål.</strong>
-    Varje attackvektor mot den är explict stängd per design — inte per konfiguration.
+    Varje attackvektor mot den är explicit stängd per design — inte per konfiguration.
   </p>
 
   <div class="nocmd-grid reveal reveal-delay-2" style="margin-top:3.5rem;">
@@ -1743,7 +1767,7 @@ footer {
       <h3>Lateral förflyttning via säkerhetsinstansen till OT</h3>
       <p>
         En angripare på säkerhetsinstansen försöker nå OT-nätverket.
-        <strong>VLAN-ACL:er på switcknivå blockerar all trafik</strong> utom
+        <strong>VLAN-ACL:er på switchnivå blockerar all trafik</strong> utom
         SSH mot driftinstansen och Teams-API utgående.
         Säkerhetsinstansen har ingen routad väg till VLAN 10 (OT) eller VLAN 20 (Mgmt) —
         <em>det är en nätverksarkitekturrestriktion, inte en mjukvarurestriktion.</em>
@@ -2088,7 +2112,7 @@ footer {
     <div class="co-grid">
       <div class="co-item">
         <div class="co-regs"><span style="color:var(--red)">AI Act</span> + <span style="color:var(--amber)">NIS2</span></div>
-        <div class="co-desc">Incidentrapportering vid AI-systemfel. En AI-driven feldetektering som missar ett kritiskt OT-fel kan vara en NIS2-incident och ett AI Act-systemfel simultaneously. Dubbel rapporteringsplikt måste koordineras.</div>
+        <div class="co-desc">Incidentrapportering vid AI-systemfel. En AI-driven feldetektering som missar ett kritiskt OT-fel kan vara en NIS2-incident och ett AI Act-systemfel samtidigt. Dubbel rapporteringsplikt måste koordineras.</div>
       </div>
       <div class="co-item">
         <div class="co-regs"><span style="color:var(--amber)">NIS2</span> + <span style="color:var(--cyan)">CRA</span></div>
