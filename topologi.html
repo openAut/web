@@ -497,7 +497,7 @@ footer {
       <text x="416" y="35" font-family="'Space Mono',monospace" font-size="9"   fill="#facc15" text-anchor="middle">BMS — Befintliga system</text>
       <text x="416" y="49" font-family="'Space Mono',monospace" font-size="7.5" fill="#c4870a" text-anchor="middle">Desigo CC · EcoStruxure</text>
       <text x="416" y="62" font-family="'Space Mono',monospace" font-size="7.5" fill="#c4870a" text-anchor="middle">Trend · Regin · Niagara</text>
-      <text x="416" y="75" font-family="'Space Mono',monospace" font-size="7.5" fill="#c4870a" text-anchor="middle">BACnet/IP · OPC UA</text>
+      <text x="416" y="75" font-family="'Space Mono',monospace" font-size="7.5" fill="#c4870a" text-anchor="middle">BACnet/IP · Modbus/IP</text>
 
       <rect x="514" y="16" width="150" height="72" rx="7" fill="rgba(22,163,74,0.1)"    stroke="rgba(22,163,74,0.5)"   stroke-width="0.75"/>
       <text x="589" y="36" font-family="'Space Mono',monospace" font-size="9"   fill="#4ade80" text-anchor="middle">IWMS-system</text>
@@ -511,7 +511,7 @@ footer {
       <text x="109" y="167" font-family="'Space Mono',monospace" font-size="7.5" fill="#3da55e" text-anchor="middle">PostgreSQL</text>
       <text x="109" y="181" font-family="'Space Mono',monospace" font-size="7.5" fill="#3da55e" text-anchor="middle">Enheter · Metadata</text>
       <text x="109" y="195" font-family="'Space Mono',monospace" font-size="7.5" fill="#3da55e" text-anchor="middle">Haystack · Brick Schema</text>
-      <text x="109" y="209" font-family="'Space Mono',monospace" font-size="7.5" fill="#3da55e" text-anchor="middle">OPC UA-namnrymd</text>
+      <text x="109" y="209" font-family="'Space Mono',monospace" font-size="7.5" fill="#3da55e" text-anchor="middle">MQTT topic-schema</text>
       <text x="109" y="223" font-family="'Space Mono',monospace" font-size="7.5" fill="#3da55e" text-anchor="middle">Konfiguration</text>
       <text x="109" y="237" font-family="'Space Mono',monospace" font-size="7.5" fill="#3da55e" text-anchor="middle">Signalförteckning</text>
 
@@ -519,10 +519,12 @@ footer {
       <text x="226" y="150" font-family="'Space Mono',monospace" font-size="9"   fill="#a78bfa">NemoClaw · DGX Spark</text>
       <text x="226" y="163" font-family="'Space Mono',monospace" font-size="7"   fill="rgba(167,139,250,0.75)">GB10 Grace Blackwell · 128GB unified memory · ARM64 · Air-gapped</text>
       <text x="226" y="171" font-family="'Space Mono',monospace" font-size="7.5" fill="#9d6df0">▸ MQTT-broker</text>
-      <text x="226" y="182" font-family="'Space Mono',monospace" font-size="7"   fill="#8b5cf6">  EMQX / Mosquitto · TLS · Auth</text>
-      <text x="226" y="199" font-family="'Space Mono',monospace" font-size="7.5" fill="#9d6df0">▸ LLM-motor</text>
-      <text x="226" y="210" font-family="'Space Mono',monospace" font-size="7"   fill="#8b5cf6">  OpenClaw / NemoClaw · ≤200B param</text>
-      <text x="226" y="227" font-family="'Space Mono',monospace" font-size="7.5" fill="#9d6df0">▸ FDD — Feldetektering</text>
+      <text x="226" y="182" font-family="'Space Mono',monospace" font-size="7"   fill="#8b5cf6">  EMQX · TLS · Auth · Req/Resp-topics</text>
+      <text x="226" y="193" font-family="'Space Mono',monospace" font-size="7.5" fill="#9d6df0">▸ Telegraf (ingest)</text>
+      <text x="226" y="204" font-family="'Space Mono',monospace" font-size="7"   fill="#8b5cf6">  EMQX → TimescaleDB/PostgreSQL</text>
+      <text x="226" y="215" font-family="'Space Mono',monospace" font-size="7.5" fill="#9d6df0">▸ LLM-motor</text>
+      <text x="226" y="226" font-family="'Space Mono',monospace" font-size="7"   fill="#8b5cf6">  NemoClaw läser/skriver masterdatabas</text>
+      <text x="226" y="237" font-family="'Space Mono',monospace" font-size="7.5" fill="#9d6df0">▸ FDD — Feldetektering</text>
       <text x="448" y="171" font-family="'Space Mono',monospace" font-size="7.5" fill="#9d6df0">▸ Energioptimering</text>
       <text x="448" y="182" font-family="'Space Mono',monospace" font-size="7"   fill="#8b5cf6">  Prediktion · Lastprognos</text>
       <text x="448" y="199" font-family="'Space Mono',monospace" font-size="7.5" fill="#9d6df0">▸ Anomalidetektering</text>
@@ -537,25 +539,25 @@ footer {
       <text x="90"  y="317" font-family="'Space Mono',monospace" font-size="8"   fill="#22d3ee" text-anchor="middle">Edge-nod · Profil A/D</text>
       <text x="90"  y="331" font-family="'Space Mono',monospace" font-size="7"   fill="#22a3be" text-anchor="middle">M-Bus · Modbus RTU</text>
       <text x="90"  y="344" font-family="'Space Mono',monospace" font-size="7"   fill="#22a3be" text-anchor="middle">Energi · Miljö</text>
-      <text x="90"  y="357" font-family="'Space Mono',monospace" font-size="6.5" fill="#0e8aaa" text-anchor="middle">OPC UA · MQTT</text>
+      <text x="90"  y="357" font-family="'Space Mono',monospace" font-size="6.5" fill="#0e8aaa" text-anchor="middle">MQTT over TLS</text>
 
       <rect x="176" y="300" width="148" height="72" rx="7" fill="rgba(6,182,212,0.08)" stroke="rgba(6,182,212,0.45)" stroke-width="0.75"/>
       <text x="250" y="317" font-family="'Space Mono',monospace" font-size="8"   fill="#22d3ee" text-anchor="middle">Edge-nod · Profil B/G</text>
       <text x="250" y="331" font-family="'Space Mono',monospace" font-size="7"   fill="#22a3be" text-anchor="middle">BACnet MS/TP · IP</text>
       <text x="250" y="344" font-family="'Space Mono',monospace" font-size="7"   fill="#22a3be" text-anchor="middle">MGate 5105 · VVS · DCV</text>
-      <text x="250" y="357" font-family="'Space Mono',monospace" font-size="6.5" fill="#0e8aaa" text-anchor="middle">OPC UA · MQTT</text>
+      <text x="250" y="357" font-family="'Space Mono',monospace" font-size="6.5" fill="#0e8aaa" text-anchor="middle">MQTT over TLS</text>
 
       <rect x="336" y="300" width="152" height="72" rx="7" fill="rgba(6,182,212,0.1)"  stroke="rgba(6,182,212,0.6)"  stroke-width="0.75"/>
       <text x="412" y="317" font-family="'Space Mono',monospace" font-size="8"   fill="#22d3ee" text-anchor="middle">Edge-nod · Profil C/E/F</text>
       <text x="412" y="331" font-family="'Space Mono',monospace" font-size="7"   fill="#22a3be" text-anchor="middle">Modbus TCP · IEC 62443 SL2</text>
       <text x="412" y="344" font-family="'Space Mono',monospace" font-size="7"   fill="#22a3be" text-anchor="middle">Kylmaskin · AHU · El</text>
-      <text x="412" y="357" font-family="'Space Mono',monospace" font-size="6.5" fill="#0e8aaa" text-anchor="middle">OPC UA · MQTT</text>
+      <text x="412" y="357" font-family="'Space Mono',monospace" font-size="6.5" fill="#0e8aaa" text-anchor="middle">MQTT over TLS</text>
 
       <rect x="500" y="300" width="164" height="72" rx="7" fill="rgba(6,182,212,0.08)" stroke="rgba(6,182,212,0.45)" stroke-width="0.75"/>
       <text x="582" y="317" font-family="'Space Mono',monospace" font-size="8"   fill="#22d3ee" text-anchor="middle">Edge-nod · Profil H</text>
       <text x="582" y="331" font-family="'Space Mono',monospace" font-size="7"   fill="#22a3be" text-anchor="middle">LoRaWAN · EU868</text>
       <text x="582" y="344" font-family="'Space Mono',monospace" font-size="7"   fill="#22a3be" text-anchor="middle">ChirpStack · Dragino DLOS8N</text>
-      <text x="582" y="357" font-family="'Space Mono',monospace" font-size="6.5" fill="#0e8aaa" text-anchor="middle">OPC UA · MQTT</text>
+      <text x="582" y="357" font-family="'Space Mono',monospace" font-size="6.5" fill="#0e8aaa" text-anchor="middle">MQTT over TLS</text>
 
       <!-- ══ RAD 4 — FÄLT ══ -->
       <rect x="16"  y="420" width="100" height="44" rx="6" fill="rgba(217,119,6,0.08)" stroke="rgba(217,119,6,0.35)" stroke-width="0.75"/>
@@ -622,7 +624,7 @@ footer {
       <div class="li"><div class="ld" style="background:#facc15"></div>BMS ↔ Masterdatabas (återföring streckad)</div>
       <div class="li"><div class="ld" style="background:#4ade80"></div>IWMS → Masterdatabas · Edge → Masterdatabas</div>
       <div class="li"><div class="ld" style="background:#00dc82"></div>Masterdatabas ↔ NemoClaw</div>
-      <div class="li"><div class="ld" style="background:#22d3ee"></div>Edge ↔ NemoClaw (data / SSH streckad)</div>
+      <div class="li"><div class="ld" style="background:#22d3ee"></div>Edge → EMQX (MQTT over TLS) · NemoClaw → Edge (SSH/request-topics, streckad)</div>
       <div class="li"><div class="ld" style="background:#f59e0b"></div>Fält → Edge (M-Bus · Modbus RTU/TCP · BACnet · LoRaWAN)</div>
     </div>
   </div>

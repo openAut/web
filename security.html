@@ -1090,7 +1090,7 @@ footer {
     <span class="ticker-item">Lyssnar på alla driftkanaler</span>
     <span class="ticker-item red">Social engineering-detektering</span>
     <span class="ticker-item">Nätverksisolering · VLAN-segmenterat</span>
-    <span class="ticker-item amber">Modbus · BACnet · OPC UA-trafikanalys</span>
+    <span class="ticker-item amber">Modbus · BACnet · MQTT-trafikanalys</span>
     <span class="ticker-item red">Passiv observation</span>
     <span class="ticker-item">Kan ej ta emot Teams-kommandon</span>
     <span class="ticker-item amber">Prompt injection-detektering</span>
@@ -1135,7 +1135,7 @@ footer {
         Säkerhetsagenten autentiserar med en dedikerad systemanvändare
         (<code style="font-family:var(--mono);font-size:0.82em;color:var(--cyan)">openaut-sec-ro</code>)
         som har <strong>exklusiv läsrättighet</strong> till auditloggar, konversationsloggar,
-        OPC UA-data och systemmetrik. Kontot saknar shell-åtkomst utanför definierade
+        MQTT-data och systemmetrik. Kontot saknar shell-åtkomst utanför definierade
         kommandouppsättningar. <em>Ingen sudo. Ingen skrivåtkomst. Ingen möjlighet att
         påverka konfiguration eller fältlager.</em>
       </p>
@@ -1178,7 +1178,7 @@ footer {
         <div class="arch-node green">Masterdatabas (PostgreSQL)</div>
         <div class="arch-node green">Edge SSH-orchestration</div>
         <div class="arch-node green">Teams Bot — driftbot</div>
-        <div class="arch-node cyan">OPC UA server</div>
+        <div class="arch-node cyan">MQTT-broker (EMQX · TLS)</div>
         <div class="arch-node cyan">Audit log daemon</div>
         <div class="arch-node">VLAN 10 — OT-nätverk</div>
         <div class="arch-node">VLAN 20 — Managementnät</div>
@@ -1566,7 +1566,7 @@ footer {
           <span class="threat-item-icon">📡</span>
           <div class="threat-item-body">
             <h5>Protokollanomalier</h5>
-            <p>Felaktigt formade Modbus-ramar, BACnet-läsningar av objekt utanför normal adressrymd, OPC UA-sessioner med ovanliga klientcertifikat eller ovanlig läsfrekvens.</p>
+            <p>Felaktigt formade Modbus-ramar, BACnet-läsningar av objekt utanför normal adressrymd, MQTT-klienter med ovanliga identiteter, retained messages på känsliga topics eller onormal publiceringsfrekvens.</p>
           </div>
         </div>
 
@@ -2078,7 +2078,7 @@ footer {
               <span class="cs-monitor-icon" style="color:var(--cyan)">◆</span>
               <div>
                 <strong>SBOM — Software Bill of Materials (Bilaga I)</strong>
-                <p>CRA kräver en aktuell komponentförteckning för alla digitala produkter. Skillen spårar openAuts beroenden — pymodbus, BAC0, opcua-asyncio, NemoClaw — och flaggar om en komponent har känd sårbarhet (CVE) utan tillämpad patch.</p>
+                <p>CRA kräver en aktuell komponentförteckning för alla digitala produkter. Skillen spårar openAuts beroenden — pymodbus, BAC0, paho-mqtt, EMQX, Telegraf, NemoClaw — och flaggar om en komponent har känd sårbarhet (CVE) utan tillämpad patch.</p>
               </div>
             </div>
             <div class="cs-monitor-item">
