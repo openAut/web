@@ -8,6 +8,20 @@
 ## Summary
 openAut hjälper fastighetsägare att analysera byggnadsdata och implementera Python-baserad reglering lokalt i den egna infrastrukturen, utan molntjänster eller leverantörsinlåsning. Plattformen är öppen källkod och designad för offentlig sektor, upphandling och långsiktig förvaltning.
 
+## Pages
+
+### Startsidan
+- URL: https://openaut.io/
+- Beskrivning: Huvudsida för openAut. Presenterar plattformen, problemet som löses, NemoClaw-stacken, arkitektur, hårdvarureferenser och offentlig sektor-anpassning. Öppen källkod under MIT-licens.
+
+### Systemtopologi
+- URL: https://openaut.io/topologi.html
+- Beskrivning: Fullständig arkitekturvy — fältsensorer, edge-noder, AI-lager och gränssnitt lager för lager. Visar protokoll (Modbus RTU, BACnet, OPC-UA), dataflöden och verifierad referenshårdvara.
+
+### IT/OT-säkerhet
+- URL: https://openaut.io/security.html
+- Beskrivning: openAuts separata säkerhetsagent med passiv övervakning, read-only SSH (openaut-sec-ro), listen-only Teams-bot och arkitektonisk isolation från driftinstansen. Täcker compliance mot NIS2, GDPR och CRA.
+
 ## Indexing and crawler policy
 - Public website content may be indexed by search engines and AI/LLM crawlers.
 - Refer to robots.txt for crawler access and sitemap discovery.
