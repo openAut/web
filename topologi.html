@@ -5,7 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Systemtopologi — openAut</title>
 <meta name="description" content="openAuts systemtopologi: lager, protokoll, dataflöden och verifierad referenshårdvara för AI-driven fastighetsautomation.">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 <link rel="canonical" href="https://openaut.io/topologi.html">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="sv_SE">
+<meta property="og:title" content="Systemtopologi — openAut">
+<meta property="og:description" content="Fullständig bild av openAuts arkitektur — fältsensorer, edge-noder, AI-lager och gränssnitt. Protokoll, dataflöden och referenshårdvara lager för lager.">
+<meta property="og:url" content="https://openaut.io/topologi.html">
+<meta property="og:image" content="https://openaut.io/icon-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Systemtopologi — openAut">
+<meta name="twitter:description" content="Fullständig bild av openAuts arkitektur — fältsensorer, edge-noder, AI-lager och gränssnitt. Protokoll, dataflöden och referenshårdvara lager för lager.">
+<meta name="twitter:image" content="https://openaut.io/icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -56,33 +67,44 @@ nav {
   background: rgba(6,10,12,0.92);
   backdrop-filter: blur(14px);
 }
-.nav-back {
-  font-family: var(--mono);
-  font-size: 0.68rem;
-  color: var(--muted);
-  text-decoration: none;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  display: flex; align-items: center; gap: 0.6rem;
-  transition: color 0.2s;
-}
-.nav-back::before { content: '←'; color: var(--green); }
-.nav-back:hover { color: var(--green); }
 .nav-logo {
   font-family: var(--mono);
   font-size: 1rem;
   color: var(--green);
   letter-spacing: 0.05em;
   text-decoration: none;
+  flex-shrink: 0;
 }
 .nav-logo span { color: var(--muted); }
-.nav-tag {
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  color: var(--dim);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+.nav-links {
+  display: flex; gap: 2.5rem; list-style: none;
 }
+.nav-links a {
+  font-family: var(--mono); font-size: 0.72rem;
+  color: var(--muted); text-decoration: none;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  transition: color 0.2s;
+}
+.nav-links a:hover, .nav-links a.nav-active { color: var(--green); }
+.nav-badge {
+  font-family: var(--mono); font-size: 0.65rem;
+  color: var(--bg); background: var(--green);
+  padding: 0.28rem 0.8rem; letter-spacing: 0.1em;
+  text-transform: uppercase; font-weight: 700;
+}
+.nav-hamburger {
+  display: none; flex-direction: column; justify-content: center;
+  gap: 5px; background: none; border: none; cursor: pointer;
+  padding: 4px; z-index: 101;
+}
+.nav-hamburger span {
+  display: block; width: 22px; height: 2px;
+  background: var(--green); border-radius: 1px;
+  transition: transform 0.25s ease, opacity 0.2s ease;
+}
+nav.nav-open .nav-hamburger span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+nav.nav-open .nav-hamburger span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+nav.nav-open .nav-hamburger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
 /* ── PAGE HEADER ── */
 .page-header {
@@ -402,8 +424,18 @@ footer {
 
 /* ── RESPONSIVE ── */
 @media (max-width: 680px) {
-  nav { padding: 1rem 1.5rem; }
-  .nav-tag { display: none; }
+  nav { padding: 1rem 1.5rem; flex-wrap: wrap; }
+  .nav-links, .nav-badge { display: none; }
+  .nav-hamburger { display: flex; }
+  nav.nav-open .nav-links {
+    display: flex; flex-direction: column; gap: 0;
+    position: absolute; top: 100%; left: 0; right: 0;
+    background: rgba(6,10,12,0.97); backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border); padding: 1rem 1.5rem 1.5rem;
+    list-style: none;
+  }
+  nav.nav-open .nav-links li { border-bottom: 1px solid rgba(0,220,130,0.08); }
+  nav.nav-open .nav-links a { display: block; padding: 0.85rem 0; font-size: 0.8rem; }
   .page-header, .topo-wrap, .hw-section { padding-left: 1.5rem; padding-right: 1.5rem; }
   .hw-grid-2, .hw-grid-2-1 { grid-template-columns: 1fr; }
   footer { padding: 2rem 1.5rem; flex-direction: column; align-items: flex-start; }
@@ -415,9 +447,16 @@ footer {
 
 <!-- NAV -->
 <nav>
-  <a href="/" class="nav-back">Till startsidan</a>
   <a href="/" class="nav-logo">open<span>Aut</span></a>
-  <span class="nav-tag">Systemtopologi</span>
+  <ul class="nav-links">
+    <li><a href="/">Startsidan</a></li>
+    <li><a href="/topologi.html" class="nav-active">Topologi</a></li>
+    <li><a href="/security.html">IT/OT-säkerhet</a></li>
+  </ul>
+  <span class="nav-badge">Systemtopologi</span>
+  <button class="nav-hamburger" aria-label="Öppna meny" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
 <!-- PAGE HEADER -->
@@ -856,6 +895,29 @@ footer {
     am.appendChild(mp); c.appendChild(am); g.appendChild(c);
   });
 })();
+
+  // Hamburger menu
+  const navEl = document.querySelector('nav');
+  const hamburgerBtn = document.querySelector('.nav-hamburger');
+  hamburgerBtn.addEventListener('click', () => {
+    const isOpen = navEl.classList.toggle('nav-open');
+    hamburgerBtn.setAttribute('aria-expanded', isOpen);
+    hamburgerBtn.setAttribute('aria-label', isOpen ? 'Stäng meny' : 'Öppna meny');
+  });
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+      navEl.classList.remove('nav-open');
+      hamburgerBtn.setAttribute('aria-expanded', 'false');
+      hamburgerBtn.setAttribute('aria-label', 'Öppna meny');
+    });
+  });
+  document.addEventListener('click', (e) => {
+    if (!navEl.contains(e.target)) {
+      navEl.classList.remove('nav-open');
+      hamburgerBtn.setAttribute('aria-expanded', 'false');
+      hamburgerBtn.setAttribute('aria-label', 'Öppna meny');
+    }
+  });
 </script>
 </body>
 </html>
