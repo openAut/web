@@ -391,7 +391,7 @@ section { padding: 7rem 4rem; position: relative; }
 .perm-name {
   font-family: var(--mono); font-size: 0.7rem;
   color: var(--text-muted); letter-spacing: 0.04em;
-  padding-top: 0.05rem;
+  padding-top: 0.05rem; overflow-wrap: anywhere;
 }
 .perm-badge {
   font-family: var(--mono); font-size: 0.58rem;
@@ -809,8 +809,9 @@ footer {
   .arch-connector { flex-direction: row; padding: 1.2rem; border-left: none; border-right: none; border-top: 1px solid var(--border-sec); border-bottom: 1px solid var(--border-sec); }
   .arch-conn-arrow, .arch-conn-label, .arch-conn-block { writing-mode: horizontal-tb; }
   .ssh-grid, .teams-layout, .threat-cols, .hw-compare { grid-template-columns: 1fr; gap: 2.5rem; }
-  .ssh-perm-row { grid-template-columns: 1.8rem 1fr auto; }
-  .ssh-cmd-block { overflow-x: auto; }
+  .ssh-grid > * { min-width: 0; }
+  .ssh-perm-row { grid-template-columns: 1.8rem minmax(0,1fr) auto; }
+  .ssh-cmd-block { overflow-x: auto; min-width: 0; }
   .ssh-cmd-body { min-width: 520px; }
   .alert-step { grid-template-columns: 1fr; }
   .alert-step-label { border-right: none; border-bottom: 1px solid var(--border-sec); }
@@ -828,7 +829,7 @@ footer {
   .tp-card { padding: 2rem 1.4rem; }
   .nocmd-card { padding: 1.6rem 1.4rem; }
   .hw-card { padding: 1.8rem 1.4rem; }
-  .ssh-perm-row { grid-template-columns: 1.8rem 1fr; }
+  .ssh-perm-row { grid-template-columns: 1.8rem minmax(0,1fr); }
   .perm-badge { grid-column: 2; }
   .arch-instance { padding: 1.8rem 1.2rem; }
   .alert-step-content { padding: 1.4rem 1.2rem; }
@@ -1015,7 +1016,48 @@ footer {
   font-size: 0.78rem; color: var(--text-muted); font-weight: 300; line-height: 1.65;
 }
 
+/* ── REGELVERKSKARTA (fem ramverk · ansvarsfördelning) ── */
+.framework-scope {
+  margin-top: 3rem; border: 1px solid var(--border-sec);
+}
+.fs-head {
+  display: flex; align-items: baseline; gap: 0.4rem 1.2rem; flex-wrap: wrap;
+  padding: 1rem 1.8rem; background: var(--surface2);
+  border-bottom: 1px solid var(--border-sec);
+}
+.fs-head-title {
+  font-family: var(--mono); font-size: 0.65rem; color: var(--text-muted);
+  letter-spacing: 0.12em; text-transform: uppercase;
+}
+.fs-head-note {
+  font-family: var(--mono); font-size: 0.58rem; color: var(--text-dim);
+  letter-spacing: 0.04em;
+}
+.fs-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 0; background: var(--border-sec);
+}
+.fs-item {
+  background: var(--bg); padding: 1.4rem 1.25rem;
+  display: flex; flex-direction: column; gap: 0.5rem;
+  border-top: 2px solid var(--fs-c, var(--text-dim));
+}
+.fs-name {
+  font-family: var(--display); font-size: 1.15rem; font-weight: 800;
+  letter-spacing: -0.02em; line-height: 1; color: var(--fs-c, var(--text));
+}
+.fs-scope {
+  font-family: var(--mono); font-size: 0.55rem; color: var(--text-muted);
+  letter-spacing: 0.07em; text-transform: uppercase; line-height: 1.45;
+}
+.fs-desc {
+  font-size: 0.75rem; color: var(--text-muted); font-weight: 300;
+  line-height: 1.6; margin-top: 0.1rem;
+}
+
 @media (max-width: 900px) {
+  .framework-scope { margin-top: 2rem; }
+  .fs-grid { grid-template-columns: 1fr; }
   .compliance-skill { grid-template-columns: 1fr; }
   .compliance-skill-label { border-right: none; border-bottom: 1px solid var(--border-sec); }
   .compliance-skill-content { grid-template-columns: 1fr; gap: 2rem; }
@@ -1064,13 +1106,16 @@ footer {
     Den läser driftinstansens loggar via read-only SSH, lyssnar på alla Teams-kanaler
     utan att kunna ta emot kommandon, och flaggar misstänkt aktivitet till ett isolerat
     säkerhetsteam — <strong>utan att någon kan instruera den via Teams.</strong>
+    Principen är medveten: agentstacken är kraftfull och tillåtande som standard, så
+    säkerhetsvärdet ligger i att begränsa vad agenten <em>kan göra</em> — inte bara vad
+    den blir tillsagd. En manipulerad modell har ingen skrivväg att utnyttja.
   </p>
 
   <div class="hero-pills">
     <span class="pill pill-red">Separat hårdvara</span>
     <span class="pill pill-red">Read-only SSH</span>
     <span class="pill pill-red">Listen-only bot</span>
-    <span class="pill pill-green">Kan ej prompt-injiceras via Teams</span>
+    <span class="pill pill-green">Prompt injection — ingen verkningsradie</span>
     <span class="pill pill-amber">IEC 62443 · NIS2</span>
     <span class="pill pill-dim">MIT-licens</span>
   </div>
@@ -1842,11 +1887,48 @@ footer {
   <h2 class="section-title reveal">AI Act. NIS2. CRA.<br><span class="accent-red">Inbyggt — inte påklistrat.</span></h2>
 
   <p class="compliance-intro reveal reveal-delay-1">
-    openAut Security har tre specialiserade skills för EU:s regulatoriska ramverk. Varje skill kombinerar
-    <strong>passiv övervakning</strong> — flaggar avvikelser i realtid — med <strong>aktiv assistans</strong>:
+    openAut håller sig medvetet inom <strong>fem ramverk</strong> med en tydlig ansvarsfördelning — varje ramverk styr
+    sin egen domän. <strong>ISO 27001</strong> och <strong>IEC 62443</strong> utgör den styrande respektive tekniska grund
+    som allt vilar på. Tre av ramverken — <strong>AI Act, NIS2 och CRA</strong> — har dessutom dedikerade Security-skills
+    som kombinerar <strong>passiv övervakning</strong> — flaggar avvikelser i realtid — med <strong>aktiv assistans</strong>:
     hjälper compliance-ansvariga att förstå krav, generera dokumentation och svara på revisorer.
     Skillsen delar underliggande data men analyserar mot separata regelverksmodeller.
   </p>
+
+  <!-- REGELVERKSKARTA · fem ramverk, fem domäner -->
+  <div class="framework-scope reveal reveal-delay-1">
+    <div class="fs-head">
+      <span class="fs-head-title">Fem ramverk · tydlig ansvarsfördelning</span>
+      <span class="fs-head-note">openAut håller sig inom dessa — var och en styr sin domän.</span>
+    </div>
+    <div class="fs-grid">
+      <div class="fs-item" style="--fs-c:var(--green)">
+        <div class="fs-name">ISO 27001</div>
+        <div class="fs-scope">Ledningssystem &amp; governance</div>
+        <p class="fs-desc">Grunden för informationssäkerhetsarbetet — roller, policyer, riskhantering och ständig förbättring. Ramen som de övriga regelverken hängs upp i.</p>
+      </div>
+      <div class="fs-item" style="--fs-c:var(--amber)">
+        <div class="fs-name">NIS2</div>
+        <div class="fs-scope">Verksamhetskrav &amp; incidentstyrning</div>
+        <p class="fs-desc">Krav på samhällsviktig verksamhet — riskhantering, leverantörskedja och incidentrapportering inom 24h/72h.</p>
+      </div>
+      <div class="fs-item" style="--fs-c:var(--cyan)">
+        <div class="fs-name">IEC 62443</div>
+        <div class="fs-scope">OT / industriell cybersäkerhet</div>
+        <p class="fs-desc">Säkerhetsarkitektur på drift- och fältnivå — zonindelning, security levels (SL) och härdning av OT.</p>
+      </div>
+      <div class="fs-item" style="--fs-c:var(--cyan)">
+        <div class="fs-name">CRA</div>
+        <div class="fs-scope">Cybersäker produkt med digitala komponenter</div>
+        <p class="fs-desc">Produktkrav på openAut-mjukvaran — SBOM, sårbarhetshantering och säkerhetsuppdateringar under hela livscykeln.</p>
+      </div>
+      <div class="fs-item" style="--fs-c:var(--red)">
+        <div class="fs-name">AI Act</div>
+        <div class="fs-scope">AI-funktionens krav &amp; styrning</div>
+        <p class="fs-desc">Krav på själva AI-funktionen — mänsklig kontroll, transparens, loggning och teknisk dokumentation.</p>
+      </div>
+    </div>
+  </div>
 
   <!-- SKILL-STACK -->
   <div class="compliance-stack">

@@ -12,15 +12,15 @@ openAut hjälper fastighetsägare att analysera byggnadsdata och implementera Py
 
 ### Startsidan
 - URL: https://openaut.io/
-- Beskrivning: Huvudsida för openAut. Presenterar plattformen, problemet som löses, NemoClaw-stacken, arkitektur, hårdvarureferenser och offentlig sektor-anpassning. Öppen källkod under MIT-licens.
+- Beskrivning: Huvudsida för openAut. Presenterar plattformen, problemet som löses, NemoClaw/OpenClaw-stacken, arkitektur, hårdvarureferenser och offentlig sektor-anpassning. Öppen källkod under MIT-licens.
 
 ### Systemtopologi
 - URL: https://openaut.io/topologi.html
-- Beskrivning: Fullständig arkitekturvy — fältsensorer, edge-noder, AI-lager och gränssnitt lager för lager. Visar protokoll (Modbus RTU, BACnet, OPC-UA), dataflöden och verifierad referenshårdvara.
+- Beskrivning: Fullständig arkitekturvy — fältsensorer, edge-noder, AI-lager och gränssnitt lager för lager. Visar protokoll (Modbus RTU/TCP, BACnet, M-Bus, LoRaWAN, KNX, DALI), dataflöden och verifierad referenshårdvara.
 
 ### IT/OT-säkerhet
 - URL: https://openaut.io/security.html
-- Beskrivning: openAuts separata säkerhetsagent med passiv övervakning, read-only SSH (openaut-sec-ro), listen-only Teams-bot och arkitektonisk isolation från driftinstansen. Täcker compliance mot NIS2, GDPR och CRA.
+- Beskrivning: openAuts separata säkerhetsagent med passiv övervakning, read-only SSH (openaut-sec-ro), listen-only Teams-bot och arkitektonisk isolation från driftinstansen. Håller sig inom fem ramverk: ISO 27001 (ledningssystem/governance), NIS2 (verksamhet/incidentstyrning), IEC 62443 (OT-säkerhet), CRA (produktkrav) och AI Act (AI-funktion).
 
 ## Indexing and crawler policy
 - Public website content may be indexed by search engines and AI/LLM crawlers.
