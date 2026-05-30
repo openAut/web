@@ -27,4 +27,4 @@ openAut hjälper fastighetsägare att analysera byggnadsdata och implementera Py
 - Refer to robots.txt for crawler access and sitemap discovery.
 
 ## Contact and source
-- GitHub: https://github.com/openaut
+- GitHub: https://github.com/openAut
