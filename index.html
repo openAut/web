@@ -36,8 +36,8 @@
     --amber: #f5a623;
     --red: #ff4d4d;
     --text: #e2ede8;
-    --text-muted: #6b8a7a;
-    --text-dim: #3d5249;
+    --text-muted: #93b4a4;
+    --text-dim: #62826f;
     --mono: 'Space Mono', monospace;
     --display: 'Syne', sans-serif;
     --body: 'Inter', sans-serif;
@@ -53,6 +53,8 @@
     font-size: 16px;
     line-height: 1.7;
     overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body::before {
@@ -1618,6 +1620,28 @@
     .scenario-cards,
     .oss-cards { grid-template-columns: 1fr; }
     .cta { padding: 5rem 1.5rem; }
+
+    /* Mindre rubriker så de inte dominerar mobilskärmen */
+    .hero-title   { font-size: clamp(2rem, 9vw, 2.6rem); max-width: 100%; }
+    .section-title { font-size: clamp(1.55rem, 7vw, 2rem); }
+    .hero-sub     { font-size: 1rem; margin-top: 1.8rem; }
+    .cta h2       { font-size: clamp(1.8rem, 8vw, 2.4rem); }
+
+    /* Mindre inre marginaler så boxar får plats */
+    section { padding: 3.5rem 1.2rem; }
+    .hero { padding: 6.5rem 1.2rem 3.5rem; }
+    .hero-scroll { display: none; }
+    .hw-card, .scenario-card { padding: 1.8rem 1.4rem; }
+    .hw-specs { grid-template-columns: 1fr; }
+    .hw-arch-note { padding: 1.8rem 1.4rem; gap: 1.5rem; }
+    .terminal-body { padding: 1.4rem 1.2rem; font-size: 0.72rem; }
+  }
+
+  /* Skydd mot horisontell overflow på små skärmar */
+  @media (max-width: 900px) {
+    img, svg, table, pre { max-width: 100%; height: auto; }
+    .terminal-body, .teams-text, .oss-card p, .hw-arch-note p,
+    code, pre { overflow-wrap: anywhere; word-break: break-word; }
   }
 </style>
 </head>
