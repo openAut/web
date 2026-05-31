@@ -55,6 +55,8 @@ body {
   font-size: 16px;
   line-height: 1.7;
   overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body::before {
@@ -812,7 +814,8 @@ footer {
   .ssh-grid > * { min-width: 0; }
   .ssh-perm-row { grid-template-columns: 1.8rem minmax(0,1fr) auto; }
   .ssh-cmd-block { overflow-x: auto; min-width: 0; }
-  .ssh-cmd-body { min-width: 520px; }
+  .ssh-cmd-body { min-width: 0; font-size: 0.7rem; padding: 1.3rem 1.1rem; line-height: 1.75; }
+  .ssh-cmd-body span { overflow-wrap: anywhere; word-break: break-word; }
   .alert-step { grid-template-columns: 1fr; }
   .alert-step-label { border-right: none; border-bottom: 1px solid var(--border-sec); }
   .alert-step-content { grid-template-columns: 1fr; }
@@ -820,9 +823,11 @@ footer {
   .footer-meta { text-align: left; }
   .isolation-note { grid-template-columns: 1fr; }
   .teams-text code { word-break: break-all; }
+  img, svg, table, pre { max-width: 100%; height: auto; }
+  code, pre { overflow-wrap: anywhere; }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
   .nav-badge { display: none; }
   .hero-title { font-size: clamp(2rem, 10vw, 2.6rem); }
   .section-title { font-size: clamp(1.6rem, 7vw, 2rem); }
