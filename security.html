@@ -4,18 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>openAut Security — IT/OT-säkerhetsagent</title>
-<meta name="description" content="openAuts separata IT/OT-säkerhetsagent: passiv övervakning, read-only SSH, listen-only Teams-bot och arkitektonisk isolation från driftinstansen.">
+<meta name="description" content="openAuts separata IT/OT-säkerhetsagent: passiv övervakning, read-only SSH, listen-only Teams-bot och arkitektonisk isolation från driftinstanserna.">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 <link rel="canonical" href="https://openaut.io/security.html">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="sv_SE">
 <meta property="og:title" content="openAut Security — IT/OT-säkerhetsagent">
-<meta property="og:description" content="Separerad säkerhetsagent med passiv övervakning, read-only SSH och listen-only Teams-bot. Arkitektoniskt isolerad från driftinstansen.">
+<meta property="og:description" content="Separerad säkerhetsagent med passiv övervakning, read-only SSH och listen-only Teams-bot. Arkitektoniskt isolerad från driftinstanserna.">
 <meta property="og:url" content="https://openaut.io/security.html">
 <meta property="og:image" content="https://openaut.io/icon-512.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="openAut Security — IT/OT-säkerhetsagent">
-<meta name="twitter:description" content="Separerad säkerhetsagent med passiv övervakning, read-only SSH och listen-only Teams-bot. Arkitektoniskt isolerad från driftinstansen.">
+<meta name="twitter:description" content="Separerad säkerhetsagent med passiv övervakning, read-only SSH och listen-only Teams-bot. Arkitektoniskt isolerad från driftinstanserna.">
 <meta name="twitter:image" content="https://openaut.io/icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -1103,7 +1103,7 @@ footer {
 
   <p class="hero-sub">
     En <strong>separat openAut-instans</strong> specialiserad på IT- och OT-säkerhet.
-    Den läser driftinstansens loggar via read-only SSH, lyssnar på alla Teams-kanaler
+    Den läser driftinstansernas loggar via read-only SSH, lyssnar på alla Teams-kanaler
     utan att kunna ta emot kommandon, och flaggar misstänkt aktivitet till ett isolerat
     säkerhetsteam — <strong>utan att någon kan instruera den via Teams.</strong>
     Principen är medveten: agentstacken är kraftfull och tillåtande som standard, så
@@ -1154,7 +1154,7 @@ footer {
   <div class="section-label" data-num="01">Arkitektoniska kärnprinciper</div>
   <h2 class="section-title reveal">Tre principer som<br>inte går att kompromissa.</h2>
   <p class="principles-intro reveal reveal-delay-1">
-    Säkerhetsagentens design utgår från ett enkelt antagande: <strong>driftinstansen kan komprometteras.</strong>
+    Säkerhetsagentens design utgår från ett enkelt antagande: <strong>driftinstanserna kan komprometteras.</strong>
     Om den gör det ska säkerhetsinstansen vara opåverkad, ha bevarat alla bevis och kunna larma utan att använda
     samma kommunikationskanal som attackerades.
   </p>
@@ -1167,7 +1167,7 @@ footer {
       <h3>Arkitektonisk <em>isolation</em></h3>
       <p>
         Säkerhetsinstansen körs på <strong>separat fysisk hårdvara</strong> i ett eget VLAN-segment.
-        Den delar inget minne, ingen process och inga nätverksgränser med driftinstansen.
+        Den delar inget minne, ingen process och inga nätverksgränser med driftinstanserna.
         Komprometteras huvudsystemet är säkerhetsagenten opåverkad — den kör sin egen
         NemoClaw med sina egna nycklar, sina egna loggar och sin egna nätverksidentitet.
       </p>
@@ -1207,31 +1207,51 @@ footer {
   </div>
 </section>
 
-<!-- ARKITEKTUR: DE TVÅ INSTANSERNA -->
+<!-- ARKITEKTUR: ADVISOR + ENGINEER vs SECURITY -->
 <section class="arch-section" id="arkitektur">
   <div class="section-label green" data-num="02">Systemarkitektur</div>
-  <h2 class="section-title reveal">Två instanser.<br>En <span class="accent-green">läser.</span> En <span class="accent-red">vaktar.</span></h2>
+  <h2 class="section-title reveal">Tre instanser.<br>Två <span class="accent-green">arbetar.</span> En <span class="accent-red">vaktar.</span></h2>
 
   <div class="arch-diagram reveal reveal-delay-1">
 
-    <!-- HUVUDINSTANS -->
+    <!-- DRIFTINSTANSER: ADVISOR + ENGINEER -->
     <div class="arch-instance main">
-      <span class="arch-inst-badge badge-main">Driftinstans</span>
-      <div class="arch-inst-name green">openAut Core</div>
-      <div class="arch-inst-hw">DGX Spark · GB10 · 128 GB</div>
-      <div class="arch-nodes">
-        <div class="arch-node green">NemoClaw — driftmode</div>
-        <div class="arch-node green">MQTT-broker (EMQX)</div>
-        <div class="arch-node green">Masterdatabas (PostgreSQL)</div>
-        <div class="arch-node green">Edge SSH-orchestration</div>
-        <div class="arch-node green">Teams Bot — driftbot</div>
-        <div class="arch-node cyan">MQTT-broker (EMQX · TLS)</div>
-        <div class="arch-node cyan">Audit log daemon</div>
-        <div class="arch-node">VLAN 10 — OT-nätverk</div>
-        <div class="arch-node">VLAN 20 — Managementnät</div>
+      <span class="arch-inst-badge badge-main">Driftinstanser</span>
+      <div class="arch-inst-name green">openAut Advisor + Engineer</div>
+      <div class="arch-inst-hw">Två servrar · egen sandbox + credentials per instans</div>
+
+      <div>
+        <div style="font-family:var(--mono);font-size:0.62rem;color:var(--text-muted);letter-spacing:0.1em;margin:0.25rem 0 0.5rem;">ADVISOR — read-only, Teams-vänd:</div>
+        <div class="arch-nodes">
+          <div class="arch-node green">FDD · rotorsak · energianalys</div>
+          <div class="arch-node green">Teams Bot — Advisor</div>
+          <div class="arch-node green">Read-only mot Systemdatabasen</div>
+          <div class="arch-node amber">Skrivväg: enbart ärendekö (förslag)</div>
+        </div>
       </div>
+
+      <div>
+        <div style="font-family:var(--mono);font-size:0.62rem;color:var(--text-muted);letter-spacing:0.1em;margin:0.25rem 0 0.5rem;">ENGINEER — SSH/deploy, ej Teams:</div>
+        <div class="arch-nodes">
+          <div class="arch-node green">Guidad integration · autodokumentation</div>
+          <div class="arch-node green">Edge SSH-orchestration (IOT2050)</div>
+          <div class="arch-node green">Läser godkända ärenden · steg-för-steg</div>
+          <div class="arch-node amber">Kontrollplan: bastion · mTLS · MFA</div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-family:var(--mono);font-size:0.62rem;color:var(--text-muted);letter-spacing:0.1em;margin:0.25rem 0 0.5rem;">DELAT:</div>
+        <div class="arch-nodes">
+          <div class="arch-node cyan">Delad AI-backend: NemoClaw · Nemotron (DGX Spark / GX10)</div>
+          <div class="arch-node cyan">Systemdatabas (PostgreSQL)</div>
+          <div class="arch-node cyan">MQTT-broker (EMQX · TLS) · Audit log daemon</div>
+          <div class="arch-node">VLAN 10 — OT · VLAN 20 — Management</div>
+        </div>
+      </div>
+
       <div style="margin-top:1rem;">
-        <div style="font-family:var(--mono);font-size:0.62rem;color:var(--text-muted);letter-spacing:0.1em;margin-bottom:0.5rem;">SYSTEMANVÄNDARE PÅ DENNA MASKIN:</div>
+        <div style="font-family:var(--mono);font-size:0.62rem;color:var(--text-muted);letter-spacing:0.1em;margin-bottom:0.5rem;">SYSTEMANVÄNDARE PÅ DESSA MASKINER:</div>
         <div class="arch-node amber">openaut-sec-ro · uid=9001 · shell=/sbin/nologin</div>
         <div style="font-family:var(--mono);font-size:0.6rem;color:var(--text-muted);margin-top:0.5rem;line-height:1.5;">
           Tillåtna kommandon: cat, tail, grep, journalctl<br>
@@ -1268,7 +1288,7 @@ footer {
       <div style="margin-top:1rem;">
         <div style="font-family:var(--mono);font-size:0.62rem;color:var(--text-muted);letter-spacing:0.1em;margin-bottom:0.5rem;">BEGRÄNSNINGAR:</div>
         <div class="arch-node red">Tar inga kommandon via Teams</div>
-        <div class="arch-node red">Kan ej skriva till driftinstansen</div>
+        <div class="arch-node red">Kan ej skriva till driftinstanserna</div>
         <div class="arch-node red">Larm går till separat kanal</div>
       </div>
     </div>
@@ -1286,7 +1306,7 @@ footer {
 
     <div class="ssh-text reveal reveal-delay-1">
       <p>
-        Säkerhetsagenten autentiserar mot driftinstansen med en systemanvändare
+        Säkerhetsagenten autentiserar mot driftinstanserna med en systemanvändare
         (<code style="font-family:var(--mono);font-size:0.85em;color:var(--cyan)">openaut-sec-ro</code>)
         som <strong>enbart existerar för att läsa loggar</strong>. Kontot har inget
         interaktivt shell — <code style="font-family:var(--mono);font-size:0.85em;color:var(--cyan)">/sbin/nologin</code> — och
@@ -1361,7 +1381,7 @@ footer {
           <div class="ssh-cmd-dot d1"></div>
           <div class="ssh-cmd-dot d2"></div>
           <div class="ssh-cmd-dot d3"></div>
-          <span class="ssh-cmd-title">openaut-security — SSH-session mot driftinstansen</span>
+          <span class="ssh-cmd-title">openaut-security — SSH-session mot driftinstanserna</span>
         </div>
         <div class="ssh-cmd-body">
           <div><span class="t-sec-prompt">sec@security:~$ </span><span class="t-cmd">ssh openaut-sec-ro@openaut-main.local</span></div>
@@ -1517,9 +1537,9 @@ footer {
           <div>
             <h4>Konversationshistorik jämförs mot SSH-loggar</h4>
             <p>
-              Säkerhetsagenten korrelerar Teams-konversationer mot driftinstansens
+              Säkerhetsagenten korrelerar Teams-konversationer mot driftinstansernas
               SSH-auditlogg och kommandologg. En begäran om att lista edge-noder i Teams
-              följt av <em>ovanligt SSH-nyckelutbyte på driftinstansen</em> är ett
+              följt av <em>ovanligt SSH-nyckelutbyte på driftinstanserna</em> är ett
               sammansatt larm — inget av systemen ser det ensamt.
             </p>
           </div>
@@ -1574,7 +1594,7 @@ footer {
           <span class="threat-item-icon">🔑</span>
           <div class="threat-item-body">
             <h5>Autentiseringsanomalier</h5>
-            <p>Ovanliga inloggningstider, nya SSH-nycklar, misslyckade autentiseringsförsök eller förändrade användarrättigheter på driftinstansen — synliga via audit-logg.</p>
+            <p>Ovanliga inloggningstider, nya SSH-nycklar, misslyckade autentiseringsförsök eller förändrade användarrättigheter på driftinstanserna — synliga via audit-logg.</p>
           </div>
         </div>
 
@@ -1605,7 +1625,7 @@ footer {
           <span class="threat-item-icon">🔌</span>
           <div class="threat-item-body">
             <h5>Nya okatalogiserade enheter</h5>
-            <p>Enheter som dyker upp på OT-nätverket och inte finns registrerade i masterdatabasen. Genererar omedelbart larm — kan indikera rogue device eller lateral förflyttning.</p>
+            <p>Enheter som dyker upp på OT-nätverket och inte finns registrerade i Systemdatabasen. Genererar omedelbart larm — kan indikera rogue device eller lateral förflyttning.</p>
           </div>
         </div>
 
@@ -1715,13 +1735,13 @@ footer {
       </div>
       <div class="alert-step-content">
         <div class="alert-step-desc">
-          Alla larmsignaler, rådata och korrelerade mönster sparas i säkerhetsinstansens lokala audit-databas — <strong>inte i driftinstansens databas.</strong>
-          En angripare som komprometterar driftinstansen och rensar dess loggar kan inte radera säkerhetsinstansens bevis.
+          Alla larmsignaler, rådata och korrelerade mönster sparas i säkerhetsinstansens lokala audit-databas — <strong>inte i driftinstansernas databas.</strong>
+          En angripare som komprometterar driftinstanserna och rensar dess loggar kan inte radera säkerhetsinstansens bevis.
           Forensisk integritet är garanterad per design.
         </div>
         <div class="alert-chips">
           <span class="a-chip green">Lokal audit-databas</span>
-          <span class="a-chip green">Separat från driftinstansen</span>
+          <span class="a-chip green">Separat från driftinstanserna</span>
           <span class="a-chip dim">Oföränderlig logg (append-only)</span>
           <span class="a-chip dim">Signaturer per post</span>
         </div>
@@ -1737,7 +1757,7 @@ footer {
   <div class="section-label" data-num="07">Hårdvara &amp; nätverksisolering</div>
   <h2 class="section-title reveal">Separat maskin.<br><span class="accent-red">Eget VLAN.</span></h2>
   <p class="hw-intro reveal reveal-delay-1">
-    Säkerhetsinstansen kräver samma ARMv9-A-arkitektur som driftinstansen — men är aldrig
+    Säkerhetsinstansen kräver samma ARMv9-A-arkitektur som driftinstanserna — men är aldrig
     på samma fysiska maskin. <strong>Isolering är en arkitektonisk egenskap, inte en
     konfigurationsinställning.</strong>
   </p>
@@ -1745,11 +1765,11 @@ footer {
   <div class="hw-compare reveal reveal-delay-2">
 
     <div class="hw-card">
-      <span class="hw-card-badge" style="background:var(--green);color:var(--bg)">Driftinstans</span>
-      <h3 class="green">openAut Core</h3>
-      <div class="hw-card-sub">NVIDIA DGX Spark · GB10 Grace Blackwell</div>
+      <span class="hw-card-badge" style="background:var(--green);color:var(--bg)">Driftinstanser</span>
+      <h3 class="green">openAut Advisor + Engineer</h3>
+      <div class="hw-card-sub">Egna servrar · delad AI-backend (DGX Spark / ASUS GX10)</div>
       <div class="hw-spec-list">
-        <div class="hw-spec-row"><span class="hw-spec-key">Hårdvara</span><span class="hw-spec-val hi">DGX Spark (referens)</span></div>
+        <div class="hw-spec-row"><span class="hw-spec-key">Hårdvara</span><span class="hw-spec-val hi">Två servrar + delad AI-backend</span></div>
         <div class="hw-spec-row"><span class="hw-spec-key">Minne</span><span class="hw-spec-val">128 GB unified</span></div>
         <div class="hw-spec-row"><span class="hw-spec-key">VLAN</span><span class="hw-spec-val">VLAN 10 (OT) · VLAN 20 (Mgmt)</span></div>
         <div class="hw-spec-row"><span class="hw-spec-key">Nätverksåtkomst</span><span class="hw-spec-val">Edge-noder · BMS · Teams API</span></div>
@@ -1757,9 +1777,9 @@ footer {
         <div class="hw-spec-row"><span class="hw-spec-key">Skrivåtkomst till OT</span><span class="hw-spec-val hi">Ja — via applikationsprofil</span></div>
       </div>
       <div class="hw-card-note">
-        Hanterar driftsdata, edge-kommunikation och Teams-driftbot.
-        Säkerhetsinstansen har <strong>aldrig skrivåtkomst</strong> till denna maskin —
-        enbart read-only via begränsat SSH-konto.
+        Advisor (read-only, Teams) och Engineer (SSH/deploy, ej Teams) på egna servrar
+        med delad AI-backend och Systemdatabas. Säkerhetsinstansen har <strong>aldrig skrivåtkomst</strong>
+        till dessa maskiner — enbart read-only via begränsat SSH-konto.
       </div>
     </div>
 
@@ -1776,9 +1796,9 @@ footer {
         <div class="hw-spec-row"><span class="hw-spec-key">Larmutgång</span><span class="hw-spec-val">Teams #security-alerts · Webhook</span></div>
       </div>
       <div class="hw-card-note">
-        <em>Kan aldrig skriva till driftinstansens filsystem, databas eller OT-nätverk.</em>
+        <em>Kan aldrig skriva till driftinstansernas filsystem, databas eller OT-nätverk.</em>
         Om maskinen komprometteras kan angriparen läsa loggar — men <strong>inte påverka
-        fastighetsdriften</strong> eller radera driftinstansens auditspår.
+        fastighetsdriften</strong> eller radera driftinstansernas auditspår.
       </div>
     </div>
 
@@ -1787,8 +1807,8 @@ footer {
       <div>
         <h4>Varför <span>separata VLAN</span> är icke-förhandlingsbart</h4>
         <p>
-          Säkerhetsinstansen och driftinstansen kommunicerar via ett VLAN-gränssnitt med explicit ACL:
-          SSH port 22 inåt (till driftinstansen) och Teams-API utåt. All annan trafik blockeras av nätverksinfrastrukturen — inte av mjukvara.
+          Säkerhetsinstansen och driftinstanserna kommunicerar via ett VLAN-gränssnitt med explicit ACL:
+          SSH port 22 inåt (till driftinstanserna) och Teams-API utåt. All annan trafik blockeras av nätverksinfrastrukturen — inte av mjukvara.
           En angripare som tar kontroll över säkerhetsinstansen kan inte använda den som språngbräda mot OT-nätverket
           eftersom routingtabeller och VLAN-access-listor förbjuder det på switchnivå.
         </p>
@@ -1836,9 +1856,9 @@ footer {
       <h3>SSH-inlogg med komprometterade säkerhetsinstansuppgifter</h3>
       <p>
         Angriparen tar kontroll över säkerhetsinstansen och försöker använda SSH-kontot
-        för att påverka driftinstansen. <strong>Kontot har inga skrivrättigheter.</strong>
+        för att påverka driftinstanserna. <strong>Kontot har inga skrivrättigheter.</strong>
         Filsystemsbegränsningar är i OS-kärnan. Eskaleringsförsök loggas i
-        driftinstansens auditdaemon och <em>flaggas av säkerhetsagentens egna logganalys</em>.
+        driftinstansernas auditdaemon och <em>flaggas av säkerhetsagentens egna logganalys</em>.
       </p>
     </div>
 
@@ -1859,7 +1879,7 @@ footer {
       <p>
         En angripare på säkerhetsinstansen försöker nå OT-nätverket.
         <strong>VLAN-ACL:er på switchnivå blockerar all trafik</strong> utom
-        SSH mot driftinstansen och Teams-API utgående.
+        SSH mot driftinstanserna och Teams-API utgående.
         Säkerhetsinstansen har ingen routad väg till VLAN 10 (OT) eller VLAN 20 (Mgmt) —
         <em>det är en nätverksarkitekturrestriktion, inte en mjukvarurestriktion.</em>
       </p>
@@ -2195,7 +2215,7 @@ footer {
               <span class="cs-monitor-icon" style="color:var(--cyan)">◆</span>
               <div>
                 <strong>SBOM-generering och -underhåll</strong>
-                <p>Läser openAuts deploya beroenden via SSH från driftinstansen och genererar en aktuell SBOM i CycloneDX- eller SPDX-format. Uppdateras automatiskt vid ny deployment och sparas i revisionsloggen.</p>
+                <p>Läser openAuts deploya beroenden via SSH från driftinstanserna och genererar en aktuell SBOM i CycloneDX- eller SPDX-format. Uppdateras automatiskt vid ny deployment och sparas i revisionsloggen.</p>
               </div>
             </div>
             <div class="cs-monitor-item">
