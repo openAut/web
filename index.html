@@ -1718,11 +1718,11 @@
       <div class="scenario-timeline">
         <div class="scenario-event">
           <span class="event-time">03:22</span>
-          <div class="event-text">BMS genererar regleravvikelselarm på By05 LA03: framledningstemperaturgivare GT04 visar 21 °C — under börvärde 28 °C. Larmet skrivs till masterdatabasen.</div>
+          <div class="event-text">BMS genererar regleravvikelselarm på By05 LA03: framledningstemperaturgivare GT04 visar 21 °C — under börvärde 28 °C. Larmet skrivs till Systemdatabasen.</div>
         </div>
         <div class="scenario-event">
           <span class="event-time">03:23</span>
-          <div class="event-text">openAut fångar larmet. Hämtar driftkortet för LA03 från masterdatabasen — identifierar att givaren mäter framledningstemperatur på värmebatteriet i LA03 och styrs via styrventil SV01. Läser aktuell driftstatus: SV01 rapporterar 100 % öppning. GT04 visar 21 °C. Slutsats: ventilen kommenderas fullt öppen men värme uteblir — felet ligger troligen inte i ventilen utan i styrsignalen till ställdonet.<br><br>openAut hämtar AS-schemat för LA03 ur masterdatabasen och identifierar att utsignalen till SV01:s ställdon utgår från analog utgångsmodul och trådad till plint 201 och 202 i apparatskåp AS03. Signalen ska vara 0–10 VDC.</div>
+          <div class="event-text">openAut fångar larmet. Hämtar driftkortet för LA03 från Systemdatabasen — identifierar att givaren mäter framledningstemperatur på värmebatteriet i LA03 och styrs via styrventil SV01. Läser aktuell driftstatus: SV01 rapporterar 100 % öppning. GT04 visar 21 °C. Slutsats: ventilen kommenderas fullt öppen men värme uteblir — felet ligger troligen inte i ventilen utan i styrsignalen till ställdonet.<br><br>openAut hämtar AS-schemat för LA03 ur Systemdatabasen och identifierar att utsignalen till SV01:s ställdon utgår från analog utgångsmodul och trådad till plint 201 och 202 i apparatskåp AS03. Signalen ska vara 0–10 VDC.</div>
         </div>
         <div class="scenario-event">
           <span class="event-time">06:45</span>
@@ -1734,7 +1734,7 @@
         </div>
         <div class="scenario-event">
           <span class="event-time">08:15</span>
-          <div class="event-text">Teknikern byter analog utgångsmodul. Mäter 10 VDC på plint 201–202. GT04 stiger mot börvärde. Larmet kvitteras i masterdatabasen.<br><em>Fel åtgärdat på 5 timmar — utan att teknikern öppnade ett enda pappersschema.</em></div>
+          <div class="event-text">Teknikern byter analog utgångsmodul. Mäter 10 VDC på plint 201–202. GT04 stiger mot börvärde. Larmet kvitteras i Systemdatabasen.<br><em>Fel åtgärdat på 5 timmar — utan att teknikern öppnade ett enda pappersschema.</em></div>
         </div>
       </div>
     </div>
@@ -1749,7 +1749,7 @@
         </div>
         <div class="scenario-event">
           <span class="event-time">06:01</span>
-          <div class="event-text">openAut hämtar information för FJV01 ur masterdatabasen. Identifierar att anläggningen har en plattvärmeväxlare installerad 2019 utan dokumenterat servicetillfälle. Korrelerar trenden mot historiska driftdata — mönstret är konsistent med beläggning på värmeväxlarens primärsida.<br><br>BMS larmar inte. Sekundärsidan levererar rätt temperatur. Felet syns bara i relationen mellan primär- och sekundärsidans energibalanser — två datakällor som BMS aldrig ställer mot varandra.</div>
+          <div class="event-text">openAut hämtar information för FJV01 ur Systemdatabasen. Identifierar att anläggningen har en plattvärmeväxlare installerad 2019 utan dokumenterat servicetillfälle. Korrelerar trenden mot historiska driftdata — mönstret är konsistent med beläggning på värmeväxlarens primärsida.<br><br>BMS larmar inte. Sekundärsidan levererar rätt temperatur. Felet syns bara i relationen mellan primär- och sekundärsidans energibalanser — två datakällor som BMS aldrig ställer mot varandra.</div>
         </div>
         <div class="scenario-event">
           <span class="event-time">06:15</span>
@@ -1764,7 +1764,7 @@
       <div class="scenario-timeline">
         <div class="scenario-event">
           <span class="event-time">Kvartal</span>
-          <div class="event-text">Kylmaskin KM1 (byggnad 07, kylmaskinrum plan 1) visar under 8 veckor gradvis stigande energiförbrukning per producerad kyleffekt. openAut hämtar DU för KM1 ur masterdatabasen och jämför aktuell COP mot fabrikantens referensvärde och historiska säsongsvärden.<br><br>Vecka 1–8: COP sjunker från 3,8 → 2,9. Kondenseringstrycket stiger med 12 % utan motsvarande ökning av utetemperatur. Förångarsidan normal.</div>
+          <div class="event-text">Kylmaskin KM1 (byggnad 07, kylmaskinrum plan 1) visar under 8 veckor gradvis stigande energiförbrukning per producerad kyleffekt. openAut hämtar DU för KM1 ur Systemdatabasen och jämför aktuell COP mot fabrikantens referensvärde och historiska säsongsvärden.<br><br>Vecka 1–8: COP sjunker från 3,8 → 2,9. Kondenseringstrycket stiger med 12 % utan motsvarande ökning av utetemperatur. Förångarsidan normal.</div>
         </div>
         <div class="scenario-event">
           <span class="event-time">Prognos</span>
@@ -2106,8 +2106,8 @@
     <div class="arch-layer">
       <div class="arch-layer-num">LAGER 02 — EDGE</div>
       <div class="arch-layer-name">Linux-baserade edge-noder</div>
-      <div class="arch-layer-desc">Siemens SIMATIC IOT2050-noder kör standard Linux och nås av NemoClaw via krypterad SSH. openAuts protokolldrivrutiner körs direkt på noden och läser data från fältutrustning via Modbus, M-Bus, LoRa eller annat fältprotokoll. Data transporteras krypterat till EMQX-brokern via MQTT over TLS — både som kontinuerlig mätström och som on-demand request/response via topics. Ingen proprietär middleware.</div>
-      <div class="arch-user-view">NemoClaw sköter installation och konfiguration via SSH. Inga manuella ingrepp på noden. NemoClaw kan via samma SSH-åtkomst även driftsätta Python-baserade regleringsskript direkt på edge-noden. Skripten kör slutna reglerloopar mot lokal I/O — utan rundtur till AI-servern — och uppdateras, versionshanteras och återkallas centralt via NemoClaw. Regleringskod behandlas som konfiguration: granskningsbar, reproducerbar och alltid under operatörens kontroll.</div>
+      <div class="arch-layer-desc">Siemens SIMATIC IOT2050-noder kör standard Linux och nås av openAut Engineer via krypterad SSH. openAuts protokolldrivrutiner körs direkt på noden och läser data från fältutrustning via Modbus, M-Bus, LoRa eller annat fältprotokoll. Data transporteras krypterat till EMQX-brokern via MQTT over TLS — både som kontinuerlig mätström och som on-demand request/response via topics. Ingen proprietär middleware.</div>
+      <div class="arch-user-view">openAut Engineer (via NemoClaw) sköter installation och konfiguration via SSH. Inga manuella ingrepp på noden. Engineer kan via samma SSH-åtkomst även driftsätta Python-baserade regleringsskript direkt på edge-noden. Skripten kör slutna reglerloopar mot lokal I/O — utan rundtur till AI-servern — och uppdateras, versionshanteras och återkallas centralt. Regleringskod behandlas som konfiguration: granskningsbar, reproducerbar och driftsatt först efter operatörens godkännande, steg för steg.</div>
       <div class="arch-nodes">
         <div class="arch-node green">SSH-åtkomst (krypterad)</div>
         <div class="arch-node green">Modbus RTU / TCP</div>
@@ -2122,13 +2122,13 @@
 
     <div class="arch-layer">
       <div class="arch-layer-num">LAGER 03 — AI</div>
-      <div class="arch-layer-name">Masterdatabas & AI-analys</div>
-      <div class="arch-layer-desc">EMQX-brokern tar emot MQTT over TLS från alla edge-noder och Telegraf skriver datan till TimescaleDB/PostgreSQL (masterdatabasen). NemoClaw-agenten läser historik och skriver analyser och larm till masterdatabasen — med lokala språkmodeller och specialiserade detektionsmodeller, allt på samma hårdvara, utan externa anrop. On-demand-förfrågningar till edge-noder sker via MQTT request/response-topics.</div>
+      <div class="arch-layer-name">Systemdatabas & AI-analys</div>
+      <div class="arch-layer-desc">EMQX-brokern tar emot MQTT over TLS från alla edge-noder. Telegraf skriver tidsseriedata och larm till TimescaleDB, medan enheter, metadata, konfiguration och ärendekö ligger i Systemdatabasen (PostgreSQL). En delad AI-backend kör Nemotron lokalt och betjänar både openAut Advisor (read-only, Teams) och openAut Engineer (SSH/deploy) — samma modellvikter och GPU, men egen sandbox och egna credentials per instans. Analyser, larm och åtgärdsförslag skrivs tillbaka utan externa anrop. On-demand-förfrågningar till edge-noder sker via MQTT request/response-topics.</div>
       <div class="arch-user-view">All data stannar i byggnaden. GDPR-säkert per design.</div>
       <div class="arch-nodes">
         <div class="arch-node cyan">EMQX-broker (MQTT over TLS)</div>
         <div class="arch-node cyan">Telegraf (ingest → TimescaleDB)</div>
-        <div class="arch-node cyan">TimescaleDB / PostgreSQL (master)</div>
+        <div class="arch-node cyan">TimescaleDB (tidsserie) · PostgreSQL (Systemdatabas)</div>
         <div class="arch-node cyan">Lokal LLM-inferens</div>
         <div class="arch-node cyan">Feldetektering (FDD)</div>
         <div class="arch-node cyan">Energioptimering</div>
@@ -2140,11 +2140,12 @@
     <div class="arch-layer">
       <div class="arch-layer-num">LAGER 04 — GRÄNSSNITT</div>
       <div class="arch-layer-name">Operatörens verktyg</div>
-      <div class="arch-layer-desc">Insikter når de som behöver dem — i verktyg de redan använder. Chatten för drifttekniker. Dashboarden för energisamordnare. API:et för integrationsteamet.</div>
+      <div class="arch-layer-desc">Insikter når de som behöver dem — i verktyg de redan använder. Chatten (openAut Advisor) för drifttekniker. Dashboarden och Power BI för energisamordnare och förvaltare. API:et för integrationsteamet.</div>
       <div class="arch-user-view">Inget nytt system att lära sig. Rådgivande — aldrig styrande.</div>
       <div class="arch-nodes">
         <div class="arch-node">Microsoft Teams / Slack</div>
         <div class="arch-node">Webb-HMI & dashboard</div>
+        <div class="arch-node">Power BI Report Server (on-prem, read-only)</div>
         <div class="arch-node">Larmhantering</div>
         <div class="arch-node">Automatisk dokumentation</div>
         <div class="arch-node">REST API</div>

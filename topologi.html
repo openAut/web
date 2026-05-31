@@ -466,7 +466,7 @@ footer {
 <div class="page-header">
   <div class="page-label">Arkitektur</div>
   <h1 class="page-title">Systemtopologi.<br><em>Lager för lager.</em></h1>
-  <p class="page-desc">Fullständig bild av openAuts arkitektur — från fältsensorer via edge-noder till AI-lager och gränssnitt. Protokoll, dataflöden och verifierad referenshårdvara för varje lager.</p>
+  <p class="page-desc">Fullständig bild av openAuts arkitektur — från fältsensorer via edge-noder till AI-lager och gränssnitt. Protokoll, dataflöden och verifierad referenshårdvara för varje lager. Driftlagret är delat i två instanser med olika förtroendenivå: <em>Advisor</em> (read-only, Teams) och <em>Engineer</em> (SSH/deploy, ej Teams).</p>
 </div>
 
 <!-- TOPOLOGY DIAGRAM -->
@@ -490,7 +490,7 @@ footer {
       <g id="sec-zones">
         <!-- IT-zon -->
         <rect x="1"   y="8"   width="812" height="98"  rx="5" fill="rgba(59,130,246,0.07)"  stroke="rgba(59,130,246,0.2)"  stroke-width="0.5"/>
-        <!-- OT Management-zon (NemoClaw + Masterdatabas, ej Security-boxen) -->
+        <!-- OT Management-zon (Advisor + Engineer + Systemdatabas, ej Security-boxen) -->
         <rect x="1"   y="178" width="678" height="132" rx="5" fill="rgba(124,58,237,0.07)"  stroke="rgba(124,58,237,0.2)"  stroke-width="0.5"/>
         <!-- Edge-zon -->
         <rect x="1"   y="338" width="678" height="96"  rx="5" fill="rgba(6,182,212,0.06)"   stroke="rgba(6,182,212,0.18)"  stroke-width="0.5"/>
@@ -500,15 +500,22 @@ footer {
         <rect x="684" y="178" width="130" height="132" rx="5" fill="rgba(239,68,68,0.05)"   stroke="rgba(239,68,68,0.22)"  stroke-width="0.5" stroke-dasharray="3 2"/>
       </g>
 
-      <!-- ══ RAD 1 ══ -->
+      <!-- ══ RAD 1 — IT-ZON ══ -->
       <rect x="16"  y="16" width="134" height="72" rx="7" fill="rgba(93,78,255,0.12)"  stroke="rgba(93,78,255,0.5)"   stroke-width="0.75"/>
       <text x="83"  y="40" font-family="'Space Mono',monospace" font-size="9"   fill="#8b7cf8" text-anchor="middle">Microsoft Teams</text>
-      <text x="83"  y="56" font-family="'Space Mono',monospace" font-size="7.5" fill="#7c6fcc" text-anchor="middle">openAut Bot</text>
+      <text x="83"  y="56" font-family="'Space Mono',monospace" font-size="7.5" fill="#7c6fcc" text-anchor="middle">openAut Advisor-bot</text>
 
-      <rect x="160" y="16" width="160" height="72" rx="7" fill="rgba(59,130,246,0.1)"   stroke="rgba(59,130,246,0.4)"  stroke-width="0.75"/>
-      <text x="240" y="36" font-family="'Space Mono',monospace" font-size="9"   fill="#6096d4" text-anchor="middle">SharePoint</text>
-      <text x="240" y="50" font-family="'Space Mono',monospace" font-size="7.5" fill="#6ba3d6" text-anchor="middle">Applikationsprofiler · I/O-listor</text>
-      <text x="240" y="63" font-family="'Space Mono',monospace" font-size="7.5" fill="#6ba3d6" text-anchor="middle">FAT/SAT · Ritningar</text>
+      <!-- Power BI Report Server (on-prem) -->
+      <rect x="152" y="16" width="74" height="72" rx="7" fill="rgba(245,158,11,0.1)"  stroke="rgba(245,158,11,0.45)" stroke-width="0.75"/>
+      <text x="189" y="38" font-family="'Space Mono',monospace" font-size="8"   fill="#f5b942" text-anchor="middle">Power BI</text>
+      <text x="189" y="51" font-family="'Space Mono',monospace" font-size="6.5" fill="#c4870a" text-anchor="middle">Report Server</text>
+      <text x="189" y="62" font-family="'Space Mono',monospace" font-size="6.5" fill="#c4870a" text-anchor="middle">on-prem</text>
+      <text x="189" y="76" font-family="'Space Mono',monospace" font-size="6"   fill="rgba(245,158,11,0.55)" text-anchor="middle">read-only</text>
+
+      <rect x="230" y="16" width="90" height="72" rx="7" fill="rgba(59,130,246,0.1)"   stroke="rgba(59,130,246,0.4)"  stroke-width="0.75"/>
+      <text x="275" y="36" font-family="'Space Mono',monospace" font-size="9"   fill="#6096d4" text-anchor="middle">SharePoint</text>
+      <text x="275" y="50" font-family="'Space Mono',monospace" font-size="6.5" fill="#6ba3d6" text-anchor="middle">App-profiler · I/O</text>
+      <text x="275" y="63" font-family="'Space Mono',monospace" font-size="6.5" fill="#6ba3d6" text-anchor="middle">FAT/SAT · Ritningar</text>
 
       <rect x="330" y="16" width="172" height="72" rx="7" fill="rgba(202,138,4,0.1)"    stroke="rgba(202,138,4,0.45)"  stroke-width="0.75"/>
       <text x="416" y="35" font-family="'Space Mono',monospace" font-size="9"   fill="#facc15" text-anchor="middle">BMS — Befintliga system</text>
@@ -518,35 +525,44 @@ footer {
 
       <rect x="514" y="16" width="150" height="72" rx="7" fill="rgba(22,163,74,0.1)"    stroke="rgba(22,163,74,0.5)"   stroke-width="0.75"/>
       <text x="589" y="36" font-family="'Space Mono',monospace" font-size="9"   fill="#4ade80" text-anchor="middle">IWMS-system</text>
-      <text x="589" y="50" font-family="'Space Mono',monospace" font-size="7.5" fill="#3da55e" text-anchor="middle">TimescaleDB</text>
-      <text x="589" y="63" font-family="'Space Mono',monospace" font-size="7.5" fill="#3da55e" text-anchor="middle">Tidsserie · Trender</text>
+      <text x="589" y="50" font-family="'Space Mono',monospace" font-size="7.5" fill="#3da55e" text-anchor="middle">Tidsseriedatabas</text>
+      <text x="589" y="63" font-family="'Space Mono',monospace" font-size="7.5" fill="#3da55e" text-anchor="middle">TimescaleDB · Trender</text>
       <text x="589" y="76" font-family="'Space Mono',monospace" font-size="7.5" fill="#3da55e" text-anchor="middle">Larm · Energidata</text>
 
-      <!-- ══ RAD 2 ══ -->
+      <!-- ══ RAD 2 — OT MANAGEMENT ══ -->
       <rect x="16"  y="192" width="186" height="118" rx="7" fill="rgba(22,163,74,0.1)"  stroke="rgba(22,163,74,0.5)"   stroke-width="0.75"/>
-      <text x="109" y="212" font-family="'Space Mono',monospace" font-size="9"   fill="#4ade80" text-anchor="middle">Masterdatabas</text>
+      <text x="109" y="212" font-family="'Space Mono',monospace" font-size="9"   fill="#4ade80" text-anchor="middle">Systemdatabas</text>
       <text x="109" y="227" font-family="'Space Mono',monospace" font-size="7.5" fill="#3da55e" text-anchor="middle">PostgreSQL</text>
       <text x="109" y="241" font-family="'Space Mono',monospace" font-size="7.5" fill="#3da55e" text-anchor="middle">Enheter · Metadata</text>
       <text x="109" y="255" font-family="'Space Mono',monospace" font-size="7.5" fill="#3da55e" text-anchor="middle">Haystack · Brick Schema</text>
-      <text x="109" y="269" font-family="'Space Mono',monospace" font-size="7.5" fill="#3da55e" text-anchor="middle">MQTT topic-schema</text>
-      <text x="109" y="283" font-family="'Space Mono',monospace" font-size="7.5" fill="#3da55e" text-anchor="middle">Konfiguration</text>
-      <text x="109" y="297" font-family="'Space Mono',monospace" font-size="7.5" fill="#3da55e" text-anchor="middle">Signalförteckning</text>
+      <text x="109" y="269" font-family="'Space Mono',monospace" font-size="7.5" fill="#3da55e" text-anchor="middle">Konfiguration · I/O · FAT/SAT</text>
+      <text x="109" y="283" font-family="'Space Mono',monospace" font-size="7.5" fill="#3da55e" text-anchor="middle">Signalförteckning</text>
+      <text x="109" y="297" font-family="'Space Mono',monospace" font-size="7.5" fill="#f5b942" text-anchor="middle">Ärendekö (överlämning)</text>
 
       <rect x="212" y="192" width="452" height="118" rx="7" fill="rgba(124,58,237,0.1)" stroke="rgba(124,58,237,0.55)" stroke-width="0.75"/>
-      <text x="226" y="210" font-family="'Space Mono',monospace" font-size="9"   fill="#a78bfa">openAut — NemoClaw</text>
-      <text x="226" y="223" font-family="'Space Mono',monospace" font-size="7"   fill="rgba(167,139,250,0.75)">GB10 Grace Blackwell · 128GB unified memory · ARM64 · Air-gapped</text>
-      <text x="226" y="231" font-family="'Space Mono',monospace" font-size="7.5" fill="#9d6df0">▸ MQTT-broker</text>
-      <text x="226" y="242" font-family="'Space Mono',monospace" font-size="7"   fill="#8b5cf6">  EMQX · TLS · Auth · Req/Resp-topics</text>
-      <text x="226" y="253" font-family="'Space Mono',monospace" font-size="7.5" fill="#9d6df0">▸ Telegraf (ingest)</text>
-      <text x="226" y="264" font-family="'Space Mono',monospace" font-size="7"   fill="#8b5cf6">  EMQX → TimescaleDB/PostgreSQL</text>
-      <text x="226" y="275" font-family="'Space Mono',monospace" font-size="7.5" fill="#9d6df0">▸ LLM-motor</text>
-      <text x="226" y="286" font-family="'Space Mono',monospace" font-size="7"   fill="#8b5cf6">  NemoClaw läser/skriver masterdatabas</text>
-      <text x="226" y="297" font-family="'Space Mono',monospace" font-size="7.5" fill="#9d6df0">▸ FDD — Feldetektering</text>
-      <text x="448" y="231" font-family="'Space Mono',monospace" font-size="7.5" fill="#9d6df0">▸ Energioptimering</text>
-      <text x="448" y="242" font-family="'Space Mono',monospace" font-size="7"   fill="#8b5cf6">  Prediktion · Lastprognos</text>
-      <text x="448" y="259" font-family="'Space Mono',monospace" font-size="7.5" fill="#9d6df0">▸ Anomalidetektering</text>
-      <text x="448" y="270" font-family="'Space Mono',monospace" font-size="7"   fill="#8b5cf6">  Korrelation · Larmfiltrering</text>
-      <text x="448" y="287" font-family="'Space Mono',monospace" font-size="7.5" fill="#9d6df0">▸ Fine-tuning</text>
+      <!-- Skiljelinje Advisor | Engineer -->
+      <line x1="438" y1="196" x2="438" y2="290" stroke="rgba(124,58,237,0.45)" stroke-width="0.75" stroke-dasharray="3 2"/>
+
+      <!-- Advisor (vänster) -->
+      <text x="226" y="210" font-family="'Space Mono',monospace" font-size="9"   fill="#a78bfa">openAut Advisor</text>
+      <text x="226" y="221" font-family="'Space Mono',monospace" font-size="6.5" fill="rgba(167,139,250,0.75)">Read-only · Teams-vänd</text>
+      <text x="226" y="235" font-family="'Space Mono',monospace" font-size="7.5" fill="#9d6df0">▸ FDD — Feldetektering</text>
+      <text x="226" y="248" font-family="'Space Mono',monospace" font-size="7.5" fill="#9d6df0">▸ Energioptimering</text>
+      <text x="226" y="261" font-family="'Space Mono',monospace" font-size="7.5" fill="#9d6df0">▸ Rotorsaksanalys</text>
+      <text x="226" y="274" font-family="'Space Mono',monospace" font-size="7.5" fill="#9d6df0">▸ Felsökning</text>
+      <text x="226" y="287" font-family="'Space Mono',monospace" font-size="7"   fill="#8b5cf6">▸ Skriver förslag → ärendekö</text>
+
+      <!-- Engineer (höger) -->
+      <text x="448" y="210" font-family="'Space Mono',monospace" font-size="9"   fill="#a78bfa">openAut Engineer</text>
+      <text x="448" y="221" font-family="'Space Mono',monospace" font-size="6.5" fill="rgba(167,139,250,0.75)">SSH/deploy · ej Teams</text>
+      <text x="448" y="235" font-family="'Space Mono',monospace" font-size="7.5" fill="#9d6df0">▸ Integration / driftsättning</text>
+      <text x="448" y="248" font-family="'Space Mono',monospace" font-size="7.5" fill="#9d6df0">▸ Edge-reglering (IOT2050)</text>
+      <text x="448" y="261" font-family="'Space Mono',monospace" font-size="7.5" fill="#9d6df0">▸ Automatisk dokumentation</text>
+      <text x="448" y="274" font-family="'Space Mono',monospace" font-size="7.5" fill="#9d6df0">▸ Läser godkända ärenden</text>
+      <text x="448" y="287" font-family="'Space Mono',monospace" font-size="7"   fill="#8b5cf6">▸ Kontrollplan: web/CLI (mgmt)</text>
+
+      <!-- Delad AI-backend banner -->
+      <text x="438" y="302" font-family="'Space Mono',monospace" font-size="6.5" fill="rgba(167,139,250,0.6)" text-anchor="middle">Delad AI-backend: NemoClaw · Nemotron — DGX Spark / ASUS GX10 · air-gapped · egen sandbox + credentials per instans</text>
       <circle cx="651" cy="204" r="3.5" fill="#a78bfa" opacity="0.8">
         <animate attributeName="opacity" values="0.8;0.15;0.8" dur="2.1s" repeatCount="indefinite"/>
       </circle>
@@ -606,9 +622,11 @@ footer {
       <path id="l-m-bms"  d="M103,192 L103,166 L422,166 L422,88"          fill="none" stroke="#facc15" stroke-width="1" opacity="0.65" stroke-dasharray="4 3" marker-end="url(#ar)"/>
       <path id="l-iwms"   d="M589,88 L589,179 L180,179 L180,192"          fill="none" stroke="#4ade80" stroke-width="1" opacity="0.72" marker-end="url(#ar)"/>
       <path id="l-teams"  d="M78,88 L78,114 L216,114 L216,192"            fill="none" stroke="#8b7cf8" stroke-width="1" opacity="0.72" marker-end="url(#ar)"/>
-      <path id="l-sp"     d="M240,88 L240,192"                            fill="none" stroke="#8b7cf8" stroke-width="1" opacity="0.72" marker-end="url(#ar)"/>
-      <path id="l-nc-teams" d="M226,192 L226,101 L100,101 L100,88"          fill="none" stroke="#8b7cf8" stroke-width="1" opacity="0.72" stroke-dasharray="4 3" marker-end="url(#ar)"/>
-      <path id="l-nc-sp"  d="M252,192 L252,88"                            fill="none" stroke="#8b7cf8" stroke-width="1" opacity="0.72" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+      <path id="l-sp"     d="M250,88 L250,192"                            fill="none" stroke="#8b7cf8" stroke-width="1" opacity="0.72" marker-end="url(#ar)"/>
+      <path id="l-nc-teams" d="M226,192 L226,101 L100,101 L100,88"        fill="none" stroke="#8b7cf8" stroke-width="1" opacity="0.72" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+      <path id="l-nc-sp"  d="M262,192 L262,96 L300,96 L300,88"            fill="none" stroke="#8b7cf8" stroke-width="1" opacity="0.72" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+      <!-- Power BI ← Systemdatabas (IT/OT-korsning, enkelriktad read-only) -->
+      <path id="l-pbi-db" d="M150,192 L150,160 L189,160 L189,88"         fill="none" stroke="#f5b942" stroke-width="1" opacity="0.8" marker-end="url(#ar)"/>
       <path id="l-m-nc"   d="M202,212 L212,212"                           fill="none" stroke="#00dc82" stroke-width="1"    opacity="0.88" marker-end="url(#ar)"/>
       <path id="l-nc-m"   d="M212,228 L202,228"                           fill="none" stroke="#00dc82" stroke-width="1"    opacity="0.88" marker-end="url(#ar)"/>
       <path id="l-e1-nc"  d="M90,360 L90,355 L230,355 L230,310"           fill="none" stroke="#22d3ee" stroke-width="1" opacity="0.72" marker-end="url(#ar)"/>
@@ -623,7 +641,7 @@ footer {
       <path id="l-e2-m"   d="M242,360 L242,342 L100,342 L100,310"         fill="none" stroke="#4ade80" stroke-width="1" opacity="0.72" marker-end="url(#ar)"/>
       <path id="l-e3-m"   d="M404,360 L404,335 L150,335 L150,310"         fill="none" stroke="#4ade80" stroke-width="1" opacity="0.72" marker-end="url(#ar)"/>
       <path id="l-e4-m"   d="M574,360 L574,328 L195,328 L195,310"         fill="none" stroke="#4ade80" stroke-width="1" opacity="0.72" marker-end="url(#ar)"/>
-      <text x="390" y="307" font-family="'Space Mono',monospace" font-size="6.5" fill="rgba(34,211,238,0.4)" text-anchor="middle" letter-spacing="1">SSH</text>
+      <text x="320" y="347" font-family="'Space Mono',monospace" font-size="6.5" fill="rgba(34,211,238,0.4)" text-anchor="middle" letter-spacing="1">SSH (Engineer)</text>
 
       <!-- ══ LINJER — FÄLTLAGER → EDGE ══ -->
       <path id="l-f1-e1" d="M66,480 L66,432"                               fill="none" stroke="#f59e0b" stroke-width="1" opacity="0.82" marker-end="url(#ar)"/>
@@ -636,18 +654,18 @@ footer {
       <!-- ══ openAut Security · VLAN 30 ══ -->
       <rect x="690" y="192" width="120" height="118" rx="7" fill="rgba(239,68,68,0.1)" stroke="rgba(239,68,68,0.42)" stroke-width="0.75"/>
       <text x="750" y="210" font-family="'Space Mono',monospace" font-size="8.5" fill="#f87171" text-anchor="middle">openAut Security</text>
-      <text x="750" y="222" font-family="'Space Mono',monospace" font-size="6.5" fill="rgba(239,68,68,0.6)" text-anchor="middle">DGX Spark · VLAN 30</text>
+      <text x="750" y="222" font-family="'Space Mono',monospace" font-size="6.5" fill="rgba(239,68,68,0.6)" text-anchor="middle">Separat HW · VLAN 30</text>
       <text x="700" y="236" font-family="'Space Mono',monospace" font-size="7"   fill="#e05252">▸ MQTT (passiv)</text>
       <text x="700" y="247" font-family="'Space Mono',monospace" font-size="6.5" fill="rgba(239,68,68,0.55)">  Read-only SSH</text>
       <text x="700" y="259" font-family="'Space Mono',monospace" font-size="7"   fill="#e05252">▸ SIEM · Anomali</text>
       <text x="700" y="270" font-family="'Space Mono',monospace" font-size="7"   fill="#e05252">▸ Audit log</text>
       <text x="700" y="281" font-family="'Space Mono',monospace" font-size="7"   fill="#e05252">▸ NIS2-rapport</text>
-      <text x="750" y="297" font-family="'Space Mono',monospace" font-size="6"   fill="rgba(239,68,68,0.38)" text-anchor="middle">Separat HW · Isolerad</text>
+      <text x="750" y="297" font-family="'Space Mono',monospace" font-size="6"   fill="rgba(239,68,68,0.38)" text-anchor="middle">Listen-only · Isolerad</text>
       <circle cx="800" cy="203" r="3" fill="#f87171" opacity="0.75">
         <animate attributeName="opacity" values="0.75;0.15;0.75" dur="1.8s" repeatCount="indefinite"/>
       </circle>
 
-      <!-- NemoClaw ↔ Security (bidirektionell, som Masterdatabas ↔ NemoClaw) -->
+      <!-- Advisor/Engineer ↔ Security (observation) -->
       <path id="l-nc-sec"  d="M664,247 L690,247"
             fill="none" stroke="#f87171" stroke-width="1" opacity="0.9"
             style="filter: drop-shadow(0 0 3px #f87171)"/>
@@ -669,13 +687,14 @@ footer {
     </svg>
 
     <div class="oa-leg">
-      <div class="li"><div class="ld" style="background:#8b7cf8"></div>UI ↔ NemoClaw (återföring till Teams/SharePoint streckad)</div>
-      <div class="li"><div class="ld" style="background:#facc15"></div>BMS ↔ Masterdatabas (återföring streckad)</div>
-      <div class="li"><div class="ld" style="background:#4ade80"></div>IWMS → Masterdatabas · Edge → Masterdatabas</div>
-      <div class="li"><div class="ld" style="background:#00dc82"></div>Masterdatabas ↔ NemoClaw</div>
-      <div class="li"><div class="ld" style="background:#22d3ee"></div>Edge → EMQX (MQTT over TLS) · NemoClaw → Edge (SSH/request-topics, streckad)</div>
+      <div class="li"><div class="ld" style="background:#8b7cf8"></div>Teams ↔ Advisor (chatt + godkännanden) · återföring streckad</div>
+      <div class="li"><div class="ld" style="background:#f5b942"></div>Power BI Report Server ← Systemdatabas (on-prem, enkelriktad read-only)</div>
+      <div class="li"><div class="ld" style="background:#facc15"></div>BMS ↔ Systemdatabas (återföring streckad)</div>
+      <div class="li"><div class="ld" style="background:#4ade80"></div>IWMS → Systemdatabas · Edge → Systemdatabas</div>
+      <div class="li"><div class="ld" style="background:#00dc82"></div>Systemdatabas ↔ Advisor/Engineer (Advisor read-only + ärendekö)</div>
+      <div class="li"><div class="ld" style="background:#22d3ee"></div>Edge → EMQX (MQTT over TLS) · Engineer → Edge (SSH/deploy, streckad)</div>
       <div class="li"><div class="ld" style="background:#f59e0b"></div>Fält → Edge (M-Bus · Modbus RTU/TCP · BACnet · LoRaWAN)</div>
-      <div class="li"><div class="ld" style="background:rgba(239,68,68,0.7);border-radius:2px;"></div>NemoClaw ↔ Security (bidirektionell) · Teams → Security (läser konv.) · Larm → Teams</div>
+      <div class="li"><div class="ld" style="background:rgba(239,68,68,0.7);border-radius:2px;"></div>Advisor/Engineer ↔ Security (observation) · Teams → Security (läser konv.) · Larm → Teams</div>
       <div class="li"><div class="ld" style="background:rgba(59,130,246,0.5)"></div>IT-zon · VLAN 40/50 · Purdue L3.5–L4</div>
       <div class="li"><div class="ld" style="background:rgba(124,58,237,0.5)"></div>OT Management · VLAN 20 · IEC 62443 SL 2</div>
       <div class="li"><div class="ld" style="background:rgba(6,182,212,0.5)"></div>Edge-lager · VLAN 10 · IEC 62443 SL 2</div>
@@ -692,14 +711,14 @@ footer {
   <h2 class="hw-section-title">Verifierad på riktig<br><em>hårdvara.</em></h2>
 
   <div class="hw-disclaimer">
-    <strong>openAut är hårdvaruagnostisk.</strong> Nedanstående är testad referenshårdvara — inte ett krav. Varje lager kan ersättas med kompatibel utrustning som uppfyller protokoll- och prestandakraven. Välj det din organisation redan äger, kan upphandla eller föredrar.
+    <strong>openAut är hårdvaruagnostisk.</strong> Nedanstående är testad referenshårdvara — inte ett krav. Varje lager kan ersättas med kompatibel utrustning som uppfyller protokoll- och prestandakraven. AI-inferensen är en <strong>delad backend</strong> som Advisor, Engineer och Security ringer in till — samma modellvikter och GPU, men egen sandbox och egna credentials per instans. Välj det din organisation redan äger, kan upphandla eller föredrar.
   </div>
 
   <!-- AI-LAGER -->
   <div class="hw-group">
     <div class="hw-group-header">
       <span class="hw-group-pill pill-ai">AI-lager</span>
-      <span class="hw-group-name">LLM-inferens · MQTT-broker · FDD · Energioptimering</span>
+      <span class="hw-group-name">Delad inferens · MQTT-broker · FDD · Energioptimering</span>
     </div>
 
     <div class="hw-grid hw-grid-2">
@@ -737,13 +756,13 @@ footer {
         </div>
         <div class="hw-role">
           <div class="hw-role-label">Roll i openAut</div>
-          <div class="hw-role-text">Kör <strong>OpenClaw / NemoClaw</strong> lokalt. Håller MQTT-broker, LLM-inferens, FDD-modeller och energioptimering. All data stannar i fastigheten.</div>
+          <div class="hw-role-text">Delad AI-backend för <strong>OpenClaw / NemoClaw</strong>. Routar inferens till Advisor, Engineer och Security lokalt. Håller MQTT-broker, FDD-modeller och energioptimering. All data stannar i fastigheten.</div>
         </div>
         <div class="hw-tags">
           <span class="hw-tag hw-tag-hi">OpenClaw</span>
           <span class="hw-tag hw-tag-hi">NemoClaw</span>
           <span class="hw-tag">Air-gapped</span>
-          <span class="hw-tag">Dual-stack 2× = 2 PFLOP</span>
+          <span class="hw-tag">Delad backend</span>
           <span class="hw-tag">NIS2-kompatibel</span>
         </div>
       </div>
@@ -782,12 +801,12 @@ footer {
         </div>
         <div class="hw-role">
           <div class="hw-role-label">Roll i openAut</div>
-          <div class="hw-role-text">Identisk chip som DGX Spark — <strong>samma prestanda, annat fabrikat</strong>. Certifierad för OpenClaw och NemoClaw. Välj baserat på tillgänglighet och pris.</div>
+          <div class="hw-role-text">Identisk chip som DGX Spark — <strong>samma prestanda, annat fabrikat</strong>. Certifierad för OpenClaw och NemoClaw. En GX10 kan agera delad backend för flera instanser. Välj baserat på tillgänglighet och pris.</div>
         </div>
         <div class="hw-tags">
           <span class="hw-tag hw-tag-hi">OpenClaw</span>
           <span class="hw-tag hw-tag-hi">NemoClaw</span>
-          <span class="hw-tag">Dual-stack 2× = 2 PFLOP</span>
+          <span class="hw-tag">Delad backend</span>
           <span class="hw-tag">Samma chip som DGX Spark</span>
         </div>
       </div>
@@ -837,7 +856,7 @@ footer {
         </div>
         <div class="hw-role">
           <div class="hw-role-label">Roll i openAut</div>
-          <div class="hw-role-text">Kör <strong>Python-regulator och datainsamlare</strong> via pymodbus och BAC0. OpenClaw deployer logik via SSH. Kommunicerar med EM1.8U och BMS via RS485 och Ethernet.</div>
+          <div class="hw-role-text">Kör <strong>Python-regulator och datainsamlare</strong> via pymodbus och BAC0. openAut Engineer deployer logik via SSH. Kommunicerar med EM1.8U och BMS via RS485 och Ethernet.</div>
         </div>
         <div class="hw-tags">
           <span class="hw-tag hw-tag-hi">SSH-programmerbar</span>
@@ -920,6 +939,7 @@ footer {
     {id:'l-sp',       c:'#8b7cf8',r:3.8,dur:1.2,d:0.6},{id:'l-sp',       c:'#8b7cf8',r:2.6,dur:1.2,d:0.0},
     {id:'l-nc-teams', c:'#8b7cf8',r:3.8,dur:1.8,d:0.5},{id:'l-nc-teams', c:'#8b7cf8',r:2.6,dur:1.8,d:1.3},
     {id:'l-nc-sp',    c:'#8b7cf8',r:3.8,dur:1.4,d:0.9},{id:'l-nc-sp',    c:'#8b7cf8',r:2.6,dur:1.4,d:0.2},
+    {id:'l-pbi-db',   c:'#f5b942',r:3.6,dur:2.0,d:0.3},{id:'l-pbi-db',   c:'#f5b942',r:2.4,dur:2.0,d:1.2},
     {id:'l-m-nc',     c:'#00dc82',r:4.0,dur:1.0,d:0.0},{id:'l-m-nc',     c:'#00dc82',r:2.6,dur:1.0,d:0.5},
     {id:'l-nc-m',     c:'#00dc82',r:4.0,dur:1.0,d:0.3},{id:'l-nc-m',     c:'#00dc82',r:2.6,dur:1.0,d:0.8},
     {id:'l-e1-nc',    c:'#22d3ee',r:3.8,dur:2.0,d:0.0},{id:'l-e1-nc',    c:'#22d3ee',r:2.4,dur:2.0,d:1.0},
