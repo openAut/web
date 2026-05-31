@@ -6,7 +6,7 @@
 - https://openaut.io/
 
 ## Summary
-openAut hjälper fastighetsägare att analysera byggnadsdata och implementera Python-baserad reglering lokalt i den egna infrastrukturen, utan molntjänster eller leverantörsinlåsning. Plattformen är öppen källkod och designad för offentlig sektor, upphandling och långsiktig förvaltning.
+openAut hjälper fastighetsägare att analysera byggnadsdata och implementera Python-baserad reglering lokalt i den egna infrastrukturen, utan molntjänster eller leverantörsinlåsning. Plattformen är öppen källkod och designad för offentlig sektor, upphandling och långsiktig förvaltning. Driftlagret är uppdelat i två instanser med olika förtroendenivå: openAut Advisor (read-only, Teams-vänd) och openAut Engineer (SSH/deploy, ej Teams-exponerad), med åtgärdsöverlämning via godkända ärenden i Systemdatabasen.
 
 ## Pages
 
@@ -16,11 +16,11 @@ openAut hjälper fastighetsägare att analysera byggnadsdata och implementera Py
 
 ### Systemtopologi
 - URL: https://openaut.io/topologi.html
-- Beskrivning: Fullständig arkitekturvy — fältsensorer, edge-noder, AI-lager och gränssnitt lager för lager. Visar protokoll (Modbus RTU/TCP, BACnet, M-Bus, LoRaWAN, KNX, DALI), dataflöden och verifierad referenshårdvara.
+- Beskrivning: Fullständig arkitekturvy — fältsensorer, edge-noder, AI-lager och gränssnitt lager för lager. Visar protokoll (Modbus RTU/TCP, BACnet, M-Bus, LoRaWAN, KNX, DALI), dataflöden och verifierad referenshårdvara. Driftlagret är delat i openAut Advisor och openAut Engineer på var sin server, med en delad AI-backend (NemoClaw/Nemotron). Power BI Report Server (on-prem) läser read-only från Systemdatabasen.
 
 ### IT/OT-säkerhet
 - URL: https://openaut.io/security.html
-- Beskrivning: openAuts separata säkerhetsagent med passiv övervakning, read-only SSH (openaut-sec-ro), listen-only Teams-bot och arkitektonisk isolation från driftinstansen. Håller sig inom fem ramverk: ISO 27001 (ledningssystem/governance), NIS2 (verksamhet/incidentstyrning), IEC 62443 (OT-säkerhet), CRA (produktkrav) och AI Act (AI-funktion).
+- Beskrivning: openAuts separata säkerhetsagent med passiv övervakning, read-only SSH (openaut-sec-ro), listen-only Teams-bot och arkitektonisk isolation från driftinstanserna. Privilegieseparation mellan Advisor (read-only, Teams) och Engineer (SSH/deploy, ej Teams). Håller sig inom fem ramverk: ISO 27001 (ledningssystem/governance), NIS2 (verksamhet/incidentstyrning), IEC 62443 (OT-säkerhet), CRA (produktkrav) och AI Act (AI-funktion).
 
 ## Indexing and crawler policy
 - Public website content may be indexed by search engines and AI/LLM crawlers.
