@@ -1786,7 +1786,7 @@
   <h2 class="section-title reveal">Teknikern är händerna.<br><span class="accent">AI:n har läst manualen.</span></h2>
 
   <p class="guided-intro reveal reveal-delay-1">
-    När du ansluter ny utrustning — en pump, en kylmaskin, ett luftbehandlingsaggregat — behöver du inte vara protokollexpert. Släpp fabrikantens manual i Teams-kanalen, ange vilken edge-nod enheten sitter på, och låt openAut guida dig steg för steg genom inställning och integration. <strong>Teknikern utför. AI:n navigerar. Dokumentationen skriver sig själv.</strong>
+    När du ansluter ny utrustning — en pump, en kylmaskin, ett luftbehandlingsaggregat — behöver du inte vara protokollexpert. Släpp fabrikantens manual i Teams-kanalen, ange vilken edge-nod enheten sitter på, och låt openAut Advisor guida dig steg för steg. Själva driftsättningen sker först efter ditt godkännande — då utför openAut Engineer den via SSH och rapporterar tillbaka i Teams. <strong>Teknikern utför. AI:n navigerar. Dokumentationen skriver sig själv.</strong>
   </p>
 
   <div class="guided-layout">
@@ -1795,7 +1795,7 @@
     <div class="teams-mock reveal reveal-delay-2">
       <div class="teams-header">
         <div class="teams-icon">T</div>
-        <div class="teams-channel">openAut · Driftsättning<span># edge-noder</span></div>
+        <div class="teams-channel">openAut Advisor · Driftsättning<span># edge-noder</span></div>
       </div>
       <div class="teams-body">
 
@@ -1813,12 +1813,12 @@
           </div>
         </div>
 
-        <div class="teams-divider">openAut läser dokumentet · identifierar protokoll och registerstruktur</div>
+        <div class="teams-divider">openAut Advisor läser dokumentet · identifierar protokoll och registerstruktur</div>
 
         <div class="teams-msg">
           <div class="teams-avatar av-ai">AI</div>
           <div class="teams-bubble">
-            <div class="teams-name ai-name">openAut</div>
+            <div class="teams-name ai-name">openAut Advisor</div>
             <div class="teams-text">
               Hittade Modbus RTU-stöd på sidan 47. Magna3 65-120 exponerar <em>18 holding registers</em> från adress 1. Jag ser att EDGE-04 redan har en ledig RS-485-port.<br><br>
               <strong>Steg 1:</strong> Ställ in pumpens kommunikationsparametrar via frontpanelen:<br>
@@ -1840,10 +1840,10 @@
         <div class="teams-msg">
           <div class="teams-avatar av-ai">AI</div>
           <div class="teams-bubble">
-            <div class="teams-name ai-name">openAut</div>
+            <div class="teams-name ai-name">openAut Advisor</div>
             <div class="teams-text">
-              Testar kommunikation mot EDGE-04 port RS485-2, adress 5… <em>✔ Svar mottaget.</em><br><br>
-              Läser grundregistren — flöde, tryckhöjd, effekt, driftläge, larmstatus. Allt tillgängligt.<br><br>
+              Inställningarna stämmer. Jag lägger integrationen som ett <em>ärende</em> — godkänn i Teams så driftsätter <strong>Engineer</strong> drivrutinen mot EDGE-04 via SSH, steg för steg.<br><br>
+              ✔ <strong>Engineer rapporterar:</strong> kommunikation verifierad mot port RS485-2, adress 5. Grundregistren läses — flöde, tryckhöjd, effekt, driftläge, larmstatus.<br><br>
               <strong>Integration klar.</strong> Magna3 65-120 är nu aktiv i namnrymden <code>EDGE-04/VVS/Pump/CIR-07</code>. Semantisk taggning enligt Brick Schema tillagd automatiskt.<br><br>
               I/O-listan och nätverksdokumentationen för UC byggnad 25 plan 2 är uppdaterade. Du hittar dem i projektmappen.
             </div>
@@ -1861,7 +1861,7 @@
           <span class="guided-step-num">01</span>
           <div>
             <h4>Installera edge-noden vid utrustningen</h4>
-            <p>En Siemens SIMATIC IOT2050 monteras i närheten av anläggningsdelen — pump, kylmaskin, AHU. Den kör standard Linux och ansluts till OT-nätverket. NemoClaw når noden via <strong>SSH</strong> och installerar openAuts protokolldrivrutiner direkt. <strong>Ingen proprietär middleware krävs.</strong></p>
+            <p>En Siemens SIMATIC IOT2050 monteras i närheten av anläggningsdelen — pump, kylmaskin, AHU. Den kör standard Linux och ansluts till OT-nätverket. openAut Engineer når noden via <strong>SSH</strong> och installerar protokolldrivrutiner — efter teknikerns godkännande. <strong>Ingen proprietär middleware krävs.</strong></p>
           </div>
         </div>
 
@@ -1869,7 +1869,7 @@
           <span class="guided-step-num">02</span>
           <div>
             <h4>Släpp manualen i Teams-kanalen</h4>
-            <p>Teknikern laddar upp fabrikantens tekniska manual och anger vilken edge-nod enheten sitter på. openAut läser dokumentet, identifierar kommunikationsprotokoll, registerstruktur och inställningsparametrar — <em>utan att teknikern behöver leta</em>.</p>
+            <p>Teknikern laddar upp fabrikantens tekniska manual i Teams och anger vilken edge-nod enheten sitter på. openAut Advisor läser dokumentet, identifierar kommunikationsprotokoll, registerstruktur och inställningsparametrar — <em>utan att teknikern behöver leta</em>.</p>
           </div>
         </div>
 
@@ -1877,7 +1877,7 @@
           <span class="guided-step-num">03</span>
           <div>
             <h4>AI guidar, teknikern utför</h4>
-            <p>openAut ger exakta steg-för-steg-instruktioner för frontpanelsinställning, kabelanslutning och adresskonfiguration. Teknikern bekräftar varje steg i chatten. <strong>AI:n testar kommunikationen och verifierar att data flödar korrekt.</strong></p>
+            <p>openAut Advisor ger exakta steg-för-steg-instruktioner för frontpanelsinställning, kabelanslutning och adresskonfiguration. Teknikern bekräftar varje steg i chatten och godkänner driftsättningen. <strong>Engineer testar sedan kommunikationen via SSH och verifierar att data flödar korrekt.</strong></p>
           </div>
         </div>
 
@@ -1885,7 +1885,7 @@
           <span class="guided-step-num">04</span>
           <div>
             <h4>Integrationen verifieras automatiskt</h4>
-            <p>När kommunikation är etablerad läser openAut alla tillgängliga register, validerar värden mot förväntade fysikaliska gränser och flaggar om något avviker. Pumpen börjar omedelbart ingå i <em>anomalidetektering och energianalys</em>.</p>
+            <p>När kommunikation är etablerad läser Engineer alla tillgängliga register och validerar värden mot förväntade fysikaliska gränser. Pumpen börjar omedelbart ingå i Advisors <em>anomalidetektering och energianalys</em>.</p>
           </div>
         </div>
 
@@ -1893,7 +1893,7 @@
           <span class="guided-step-num">05</span>
           <div>
             <h4>Dokumentationen skriver sig själv</h4>
-            <p>I/O-lista, kommunikationstabell, MQTT topic-schema och nätverksdiagram uppdateras automatiskt. <strong>Nästa tekniker har fullständig dokumentation från dag ett</strong> — oavsett vem som utförde driftsättningen.</p>
+            <p>I/O-lista, kommunikationstabell, MQTT topic-schema och nätverksdiagram genereras automatiskt av Engineer som en sidoeffekt av driftsättningen. <strong>Nästa tekniker har fullständig dokumentation från dag ett</strong> — oavsett vem som utförde driftsättningen.</p>
           </div>
         </div>
 
@@ -2388,7 +2388,7 @@
     <div class="principle reveal">
       <span class="principle-num">P.01</span>
       <h3>Reglerar på autopilot</h3>
-      <p>openAut kan driftsätta Python-baserad reglering direkt på edge-noder via I/O, men aldrig på eget bevåg — bara när en applikationsprofil och ett explicit regleringsuppdrag har konfigurerats av behörig användare. All skrivåtkomst loggas, versionshanteras och kan återkallas. Fältets befintliga PLC:er och DDC-regulatorer behåller prioritet — openAut:s reglering är ett komplement, aldrig en override av säkerhetsfunktioner.</p>
+      <p>openAut Engineer kan driftsätta Python-baserad reglering direkt på edge-noder via I/O, men aldrig på eget bevåg — bara efter godkänt ärende och ett explicit regleringsuppdrag konfigurerat av behörig användare, steg för steg. All skrivåtkomst loggas, versionshanteras och kan återkallas. Fältets befintliga PLC:er och DDC-regulatorer behåller prioritet — openAut:s reglering är ett komplement, aldrig en override av säkerhetsfunktioner.</p>
     </div>
     <div class="principle reveal reveal-delay-1">
       <span class="principle-num">P.02</span>
