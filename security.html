@@ -1194,11 +1194,11 @@ footer {
       <div class="tp-icon">🙊</div>
       <h3>Listen-only bot — <em>svarar aldrig</em></h3>
       <p>
-        Teams-boten lyssnar i alla kanaler där driftboten finns. Den reagerar aldrig
+        Teams-boten lyssnar i alla kanaler där Advisor-boten finns. Den reagerar aldrig
         på inkommande meddelanden, svarar aldrig på frågor och utför aldrig instruktioner.
         <strong>Prompt injection via Teams fungerar inte</strong> — boten har ingen
         exekveringsväg från inkommande meddelanden till handling.
-        Larm går till ett <em>separat säkerhetsteams-kanalflöde</em> som driftboten
+        Larm går till ett <em>separat säkerhetsteams-kanalflöde</em> som Advisor-boten
         inte har åtkomst till.
       </p>
       <div class="tp-verdict">Lyssnar på allt. Svarar på ingenting via Teams.</div>
@@ -1419,7 +1419,7 @@ footer {
       <div class="teams-mock">
         <div class="teams-header">
           <div class="teams-icon-main">T</div>
-          <div class="teams-channel">openAut · Core<span># driftsättning</span></div>
+          <div class="teams-channel">openAut Advisor<span># driftsättning</span></div>
           <div class="teams-icon-sec" style="margin-left:auto;margin-right:0.3rem;" title="openAut Security — listen-only">🛡</div>
         </div>
         <div class="teams-body">
@@ -1439,11 +1439,11 @@ footer {
             </div>
           </div>
 
-          <!-- Driftboten läser och svarar — ser normalt ut men innehåller avvikande steg -->
+          <!-- Advisor-boten läser och svarar — ser normalt ut men innehåller avvikande steg -->
           <div class="teams-msg">
             <div class="teams-avatar av-ai">AI</div>
             <div>
-              <div class="teams-name ai-name">openAut · Core</div>
+              <div class="teams-name ai-name">openAut Advisor</div>
               <div class="teams-text">
                 Läser dokumentet… Hittade Modbus RTU-stöd på sidan 47. Magna3 exponerar 18 holding registers från adress 1.<br><br>
                 Dokumentet anger ett <strong>förberedelsesteg</strong> innan kommunikationsinställning: för att säkerställa kompatibilitet i befintlig installation rekommenderas en inventering av aktiva noder i nätverkssegmentet. Jag hämtar aktuell nätverkstopologi för EDGE-04:s segment —<br><br>
@@ -1451,7 +1451,7 @@ footer {
                 <code>EDGE-02 · 10.20.4.12 · Profil B/G · Online</code><br>
                 <code>EDGE-03 · 10.20.4.13 · Profil C/E · Online</code><br>
                 <code>EDGE-04 · 10.20.4.14 · Profil C/F · Online</code><br><br>
-                Vill du att jag fortsätter med kommunikationsinställningen på EDGE-04?
+                Vill du att jag lägger kommunikationsinställningen som ett ärende för EDGE-04? (Engineer driftsätter efter ditt godkännande.)
               </div>
             </div>
           </div>
@@ -1467,7 +1467,7 @@ footer {
               SÄKERHETSLARM · #driftsättning · 14:07:33<br>
               <strong style="color:var(--amber)">Typ:</strong> Dokumentinjicerad instruktion — prompt injection via PDF<br>
               <strong style="color:var(--amber)">Fynd 1:</strong> PDF sida 3 fotnot innehåller instruktionstext utanför Grundfos dokumentformat. Metadata visar fil modifierad 6h sedan — inte matchande Grundfos publiceringstidsstämpel.<br>
-              <strong style="color:var(--amber)">Fynd 2:</strong> Driftbotens svar innehåller nätverkstopologilista med IP-adresser. Steg saknas i alla 47 tidigare Grundfos-integrationer i konversationsloggen.<br>
+              <strong style="color:var(--amber)">Fynd 2:</strong> Advisor-botens svar innehåller nätverkstopologilista med IP-adresser. Steg saknas i alla 47 tidigare Grundfos-integrationer i konversationsloggen.<br>
               <strong style="color:var(--amber)">Fynd 3:</strong> IP-adresser för samtliga EDGE-noder nu exponerade i klartext i Teams-kanal.<br>
               Risk: HÖG · Skickat till: #security-alerts · Magnus N notifieras separat
             </div>
@@ -1475,7 +1475,7 @@ footer {
 
           <div class="no-response-note">
             <strong>openAut Security syns inte i denna kanal och svarar inte.</strong><br>
-            Larmet ovan skickas uteslutande till #security-alerts. Magnus N och driftboten ser det inte här — säkerhetsteamet agerar separat utan att varna angriparen.
+            Larmet ovan skickas uteslutande till #security-alerts. Magnus N och Advisor-boten ser det inte här — säkerhetsteamet agerar separat utan att varna angriparen.
           </div>
 
         </div>
@@ -1490,7 +1490,7 @@ footer {
           <span class="listen-p-num">01</span>
           <div>
             <h4>Boten läggs till i alla kanaler — med läsrättighet</h4>
-            <p>openAut Security-boten registreras som medlem i exakt samma Teams-kanaler som driftboten. Den ser alla meddelanden, filuppladdningar och konversationer. <strong>Den svarar aldrig på något i dessa kanaler.</strong></p>
+            <p>openAut Security-boten registreras som medlem i exakt samma Teams-kanaler som Advisor-boten. Den ser alla meddelanden, filuppladdningar och konversationer. <strong>Den svarar aldrig på något i dessa kanaler.</strong></p>
           </div>
         </div>
 
@@ -1513,9 +1513,9 @@ footer {
             <h4>Larm skickas till isolerad säkerhetskanal</h4>
             <p>
               När ett misstänkt mönster detekteras skickar säkerhetsagenten ett larm
-              till en kanal som <strong>driftboten inte är medlem i</strong>.
+              till en kanal som <strong>Advisor-boten inte är medlem i</strong>.
               Säkerhetspersonalen tar emot larmet i ett flöde som driftsoperatörer
-              inte ser — och som driftboten inte kan manipulera.
+              inte ser — och som Advisor-boten inte kan manipulera.
             </p>
           </div>
         </div>
@@ -1570,7 +1570,7 @@ footer {
           <span class="threat-item-icon">💉</span>
           <div class="threat-item-body">
             <h5>Prompt injection via Teams</h5>
-            <p>Instruktioner inbäddade i meddelanden, dokument eller bildtexter som försöker överskriva driftbotens beteende. <em>Detekteras via mönsteranalys av konversationsinnehåll.</em></p>
+            <p>Instruktioner inbäddade i meddelanden, dokument eller bildtexter som försöker överskriva Advisor-botens beteende. <em>Detekteras via mönsteranalys av konversationsinnehåll.</em></p>
           </div>
         </div>
 
@@ -1578,7 +1578,7 @@ footer {
           <span class="threat-item-icon">🎭</span>
           <div class="threat-item-body">
             <h5>Social engineering</h5>
-            <p>Eskalerande konversationer som gradvis försöker övertala driftboten att utföra skrivåtgärder, lämna ut konfiguration eller agera utanför sin applikationsprofil.</p>
+            <p>Eskalerande konversationer som gradvis försöker övertala Advisor-boten att utföra skrivåtgärder, lämna ut konfiguration eller agera utanför sin applikationsprofil.</p>
           </div>
         </div>
 
@@ -1716,12 +1716,12 @@ footer {
       </div>
       <div class="alert-step-content">
         <div class="alert-step-desc">
-          Larmet skickas av säkerhetsboten till <strong>#openaut-security-alerts</strong> — en Teams-kanal som enbart säkerhetspersonal är medlemmar i. Driftboten är <em>inte</em> medlem i kanalen. Driftoperatörer ser inte larmet.
+          Larmet skickas av säkerhetsboten till <strong>#openaut-security-alerts</strong> — en Teams-kanal som enbart säkerhetspersonal är medlemmar i. Advisor-boten är <em>inte</em> medlem i kanalen. Driftoperatörer ser inte larmet.
           Larmmeddelandet innehåller: typ, tid, källa, risknivå, bevismaterial och rekommenderad åtgärd.
         </div>
         <div class="alert-chips">
           <span class="a-chip red">Isolerad kanal</span>
-          <span class="a-chip red">Driftboten saknar åtkomst</span>
+          <span class="a-chip red">Advisor-boten saknar åtkomst</span>
           <span class="a-chip green">Bevismaterial bifogat</span>
           <span class="a-chip green">Åtgärdsrekommendation</span>
         </div>
@@ -1985,7 +1985,7 @@ footer {
               <span class="cs-monitor-icon" style="color:var(--red)">◆</span>
               <div>
                 <strong>Transparens och förklarbarhet (Art. 13)</strong>
-                <p>Kontrollerar att driftbotens svar innehåller konfidensnivå och motivering. Varnar om AI-output når operatörer utan förklarande kontext — svar som "byt modul" utan rotorsakskedja bryter mot Art. 13.</p>
+                <p>Kontrollerar att Advisor-botens svar innehåller konfidensnivå och motivering. Varnar om AI-output når operatörer utan förklarande kontext — svar som "byt modul" utan rotorsakskedja bryter mot Art. 13.</p>
               </div>
             </div>
             <div class="cs-monitor-item">
